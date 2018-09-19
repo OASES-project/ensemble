@@ -10,20 +10,12 @@ Commands:
 
 Usage:
   # TODO: Adapt for ensemble
-  ocelot-cli run <dirpath> [--noshow] [--save=<strategy>]
-  ocelot-cli run <dirpath> <config> [--noshow] [--save=<strategy>]
-  ocelot-cli cleanup
-  ocelot-cli validate <dirpath>
-  ocelot-cli xsd <dirpath> <schema>
-  ocelot-cli xsd <dirpath>
-  ocelot-cli -l | --list
-  ocelot-cli -h | --help
-  ocelot-cli --version
+  ensemble-cli run <dirpath> [--noshow] [--save=<strategy>]
+  ensemble-cli cleanup
+  ensemble-cli -h | --help
+  ensemble-cli --version
 
 Options:
-  --list             List the updates needed, but don't do anything
-  --noshow           Don't open HTML report in new web browser tab
-  --save=<strategy>  Strategy for which intermediate results to save.
   -h --help          Show this screen.
   --version          Show version.
 
@@ -35,22 +27,9 @@ import sys
 
 def main():
     try:
-        args = docopt(__doc__, version='Ocelot open source linker CLI 0.2')
-        if args['run']:
-            system_model(args["<dirpath>"], args['<config>'], show=not args['--noshow'], save_strategy=args['--save'])
-        elif args['validate']:
-            validate_directory(args['<dirpath>'])
-        elif args['xsd']:
-            validate_directory_against_xsd(
-              args['<dirpath>'],
-              args['<schema>'] or os.path.join(data_dir, 'EcoSpold02.xsd')
-            )
-        elif args['cleanup']:
-            cleanup_data_directory()
-        else:
-            raise ValueError
+        pass
     except KeyboardInterrupt:
-        print("Terminating Ocelot CLI")
+        print("Terminating ensemble CLI")
         sys.exit(1)
 
 
