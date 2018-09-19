@@ -25,7 +25,7 @@ def package_files(directory):
 
 setup(
     name='ensemble',
-    version="0.0.dev",
+    version="0.0.dev1",
     packages=packages,
     author="OASES team",
     author_email="cmutel@gmail.com",  # TODO
