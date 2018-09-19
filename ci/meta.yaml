@@ -1,0 +1,33 @@
+package:
+  name: ensemble-dev
+  version: {{ environ['VERSION'] }}
+
+source:
+  path: ..
+
+build:
+  # Build command: conda build -c conda-forge -c cmutel ensemble
+  noarch_python: True
+  number: 0
+  script: python setup.py install --single-version-externally-managed --record record.txt
+  script_env:
+   - VERSION
+   - CONDA_BLD_PATH
+
+requirements:
+  build:
+    - python
+    - setuptools
+
+  run:
+    - python
+
+test:
+  imports:
+    - {{ name }}
+
+about:
+  home: https://github.com/OASES-project/ensemble
+  license: BSD License
+  summary: 'Library to create hybrid LCI databases, using science'
+  license_family: BSD

@@ -1,24 +1,27 @@
 language: python
-matrix:
-  include:
-    - language: generic-covered
-      python: 3.5
-      os: osx
-      env: pyver=3.5.1 pydist=macpython
 python:
+  # We don't actually use the Travis Python, but this keeps it organized.
   - "3.5"
-before_install:
-  - if [ $TRAVIS_OS_NAME == "osx" ]; then echo "Running on OS X"; else echo "Running on Linux"; fi
-  - if [ "$TRAVIS_OS_NAME" == "osx" ]; then git clone https://github.com/gappleto97/terryfy; fi
-  - if [ "$TRAVIS_OS_NAME" == "osx" ]; then source terryfy/travis_tools.sh; fi
-  - if [ "$TRAVIS_OS_NAME" == "osx" ]; then get_python_environment $pydist $pyver; fi
-  - if [ "$TRAVIS_OS_NAME" == "osx" ]; then $PIP_CMD install virtualenv; fi
-  - if [ "$TRAVIS_OS_NAME" == "osx" ]; then virtualenv -p $PYTHON_EXE venv; fi
-  - if [ "$TRAVIS_OS_NAME" == "osx" ]; then source venv/bin/activate; fi
-  - echo $(python --version)
-install: "pip install -r ci/requirements-travis.txt"
+  - "3.6"
+install:
+  - sudo apt-get update
+  - wget https://repo.continuum.io/miniconda/Miniconda3-latest-Linux-x86_64.sh -O miniconda.sh;
+  - bash miniconda.sh -b -p $HOME/miniconda
+  - export PATH="$HOME/miniconda/bin:$PATH"
+  - hash -r
+  - conda config --set always_yes yes --set changeps1 no
+  - conda config --append channels conda-forge
+  - conda config --append channels cmutel
+  - conda update -q conda
+  - conda info -a
+  - conda create -q -n test-environment python=$TRAVIS_PYTHON_VERSION numpy scipy coveralls pytest
+  - source activate test-environment
+  - python setup.py install
+
 script:
-  - if [ "$TRAVIS_OS_NAME" == "linux" ]; then pwd; ls; py.test --cov=ensemble; fi
-  - if [ "$TRAVIS_OS_NAME" == "osx" ]; then py.test tests; fi
+  - pwd
+  - ls
+  - py.test --cov=ensemble
 after_success:
-  - if [ "$TRAVIS_OS_NAME" == "linux" ]; then coveralls; fi
+  - coveralls
+  - test $TRAVIS_BRANCH = "master" && test $TRAVIS_PYTHON_VERSION = 3.6 && conda install conda-build && conda install anaconda-client && bash ci/conda_upload.sh
