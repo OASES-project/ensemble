@@ -3,8 +3,15 @@
    You can adapt this file completely to your liking, but it should at least
    contain the root `toctree` directive.
 
-Welcome to ensemble's documentation!
-====================================
+ensemble hybrid LCI creator
+===========================
+
+ensemble is a Python library for creating hybrid life cycle inventory (LCI) databases, using scientific principles instead of ad hoc manual choices. It is currently under development, and therefore doesn't have anything particularly good for the time being - we are just trying to get the basic sums right to be able to export a database that can be used for calculations.
+
+The basic workflow is:
+
+.. image:: images/workflow-basic.png
+   :alt: Workflow diagram
 
 .. toctree::
    :maxdepth: 2
