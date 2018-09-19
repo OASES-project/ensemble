@@ -1,0 +1,9 @@
+docopt
+lxml
+numpy
+pandas
+pyprind
+pysut
+pytest
+stats_arrays
+wrapt
