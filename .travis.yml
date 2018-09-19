@@ -14,7 +14,7 @@ install:
   - conda config --append channels cmutel
   - conda update -q conda
   - conda info -a
-  - conda create -q -n test-environment python=$TRAVIS_PYTHON_VERSION numpy scipy coveralls pytest
+  - conda create -q -n test-environment python=$TRAVIS_PYTHON_VERSION numpy scipy coveralls pytest pytest-cov
   - source activate test-environment
   - python setup.py install
 
