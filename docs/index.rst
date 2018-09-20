@@ -17,7 +17,7 @@ The basic workflow is:
    :maxdepth: 2
    :caption: Contents:
 
-
+   interfaces
 
 Indices and tables
 ==================
