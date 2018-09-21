@@ -24,7 +24,7 @@ requirements:
 
 test:
   imports:
-    - {{ name }}
+    - ensemble
 
 about:
   home: https://github.com/OASES-project/ensemble
