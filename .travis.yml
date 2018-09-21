@@ -26,9 +26,6 @@ after_success:
       coveralls;
       if [ "$TRAVIS_BRANCH" = "master" -a "$TRAVIS_PULL_REQUEST" = "false" ]; then
         conda install conda-build anaconda-client;
-        ls /home/travis/miniconda/conda-bld/;
-        ls /home/travis/miniconda/conda-bld/noarch/;
-        cp /home/travis/miniconda/conda-bld/noarch/*.tar.bz2 .;
-        anaconda -t $CONDA_TOKEN upload --force *.tar.bz2;
+        bash ci/conda_upload.sh
       fi
-    fi
+   fi
