@@ -22,5 +22,13 @@ script:
   - ls
   - py.test --cov=ensemble
 after_success:
-  - coveralls
-  - test $TRAVIS_BRANCH = "master" && test $TRAVIS_PYTHON_VERSION = 3.6 && conda install conda-build && conda install anaconda-client && bash ci/conda_upload.sh
+  - if [ "$TRAVIS_OS_NAME" == "linux" ]; then
+      coveralls;
+      if [ "$TRAVIS_BRANCH" = "master" -a "$TRAVIS_PULL_REQUEST" = "false" ]; then
+        conda install conda-build anaconda-client;
+        ls /home/travis/miniconda/conda-bld/;
+        ls /home/travis/miniconda/conda-bld/noarch/;
+        cp /home/travis/miniconda/conda-bld/noarch/*.tar.bz2 .;
+        anaconda -t $CONDA_TOKEN upload --force *.tar.bz2;
+      fi
+    fi
