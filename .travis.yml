@@ -28,4 +28,4 @@ after_success:
         conda install conda-build anaconda-client;
         bash ci/conda_upload.sh;
       fi
-   fi
+    fi
