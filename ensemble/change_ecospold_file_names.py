@@ -22,10 +22,10 @@ def change_file_name(spoldfile_dir):
     print("Target directory is ", spoldfile_dir)
     user_choice = input("Is this correct? y/n ")
     while user_choice not in ['y','n']:
-        user_choice = input("Invalid option, please choose again \n"\
+        user_choice = raw_input("Invalid option, please choose again \n"\
                              "Is this correct? y/n ")
     if user_choice == 'n':
-        var = input("please provide the target correct target dir\n"\
+        var = raw_input("please provide the target correct target dir\n"\
                     "Or type q to quit! ")
         if var in ["q","Q"]:
             print("Quiting... Bye!")
@@ -40,7 +40,7 @@ def change_file_name(spoldfile_dir):
     os.chdir(spoldfile_dir)
     spoldfiles = os.listdir()
     
-    for i,file in enumerate(spoldfiles[:]):
+    for file in spoldfiles:
         #print(file)
         if len(file.split("_")) == 3:
             os.rename(file, "_".join(file.split("_")[1:]))
