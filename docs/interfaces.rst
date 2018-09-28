@@ -16,6 +16,7 @@ Columns
 
 * ``productId``: string. Ecoinvent UUID of the product.
 * ``productName``: string. Name of product.
+* ``unitId``: string. Ecoinvent UUID of the unit
 * ``unitName``: string. Ecoinvent name of unit, e.g. "kg".
 
 ``activities``
