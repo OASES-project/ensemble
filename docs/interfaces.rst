@@ -85,3 +85,9 @@ Colunms
 *******
 
 * ``Activities``: float. Cumulative elementry exchange per activity per elementary exchange
+
+
+
+EXIOBASE SUT DataFrames
+====================
+
