@@ -52,3 +52,35 @@ Columns
 * ``activityType``: int. See above.
 * ``startDate``: string, YYYY-MM-DD. For example, "1996-01-01".
 * ``endDate``: string, YYYY-MM-DD. For example, "1996-01-01".
+
+
+Environmental stressors (elementary exchanges)
+----------------------------------------------
+File: STR.csv
+Data frame containing all basic information about the different environmental stressors. 
+
+Columns
+*******
+
+* ``id``: string. Ecoinvent UUID of the elementary exchange.
+* ``name``: string. Name of stressor.
+* ``unit``: string. Name of Unit (e.g. kg.)
+* ``cas``: string. Cas classification e.g. "000110-63-4"
+* ``comp``: string. Compartment of stressor.
+* ``subcomp``: string. Subcompartment of stressor.
+
+
+
+G_act
+-----
+Pandas DataFrame listing all environmental exchanges (rows) per activity (columns):
+
+Index
+*****
+
+* ``id``: string. Ecoinevent UUID of elementary exchange
+
+Colunms
+*******
+
+* ``Activities``: float. Cumulative elementry exchange per activity per elementary exchange
