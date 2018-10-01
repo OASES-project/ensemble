@@ -3,16 +3,13 @@
 import argparse
 import os
 import numpy as np
-"""
-
-When ecoinvent 3.5 was released, the file names have changed.
+"""When ecoinvent 3.5 was released, the file names have changed.
 There has been some number added to the start of the filename, 
 but it can be ignored. This script takes the file_names from 
 #####_uuidAcitivity_uuidProduct to uuidAcitivity_uuidProduct
 
 Warning: Currently does not do sensibility checks! 
 Use at you own responsibility! (and make a back up of you data!)
-
 """
 
 
@@ -32,8 +29,7 @@ def change_file_name(spoldfile_dir):
             return
         else:
             spoldfile_dir = var
-
-    
+            
     print("saving current working directory")
     cwd = os.getcwd() #get cwd
     print("changing to target dir")
@@ -53,13 +49,12 @@ def change_file_name(spoldfile_dir):
 
 
 def ParseArgs():
-    '''
-    ParsArgs parser the command line options 
+    '''ParsArgs parser the command line options
     and returns them as a Namespace object
     '''
     print("Parsing arguments...")
     parser = argparse.ArgumentParser()
-    parser.add_argument("-d","--dir", type=str, dest='target_dir', 
+    parser.add_argument("-d","--dir", type=str, dest='target_dir',
                         default="/home/jakobs/data/ecoinvent/ei35_unlinked/datasets",
                         help="Directory containing the spoldfiles to be"\
                         "renamed")
