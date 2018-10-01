@@ -1,22 +1,22 @@
 #!/usr/bin/env python
-
-import argparse
-import os
-
 """When ecoinvent 3.5 was released, the file names have changed.
 There has been some number added to the start of the filename,
 but it can be ignored. This script takes the file_names from
 #####_uuidAcitivity_uuidProduct to uuidAcitivity_uuidProduct
 
 Warning: Currently does not do sensibility checks!
-Use at you own responsibility! (and make a back up of you data!)"""
+Use at you own responsibility! (and make a back up of you data!)
+"""
 
+
+import argparse
+import os
 
 
 def change_file_name(spoldfile_dir):
 
     print("Target directory is ", spoldfile_dir)
-    user_choice = input("Is this correct? y/n ")
+    user_choice = raw_input("Is this correct? y/n ")
     while user_choice not in ['y','n']:
         user_choice = raw_input("Invalid option, please choose again \n"\
                              "Is this correct? y/n ")
