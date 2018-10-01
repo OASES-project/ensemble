@@ -55,8 +55,8 @@ Columns
 * ``endDate``: string, YYYY-MM-DD. For example, "1996-01-01".
 
 
-Environmental stressors (elementary exchanges)
-----------------------------------------------
+``Environmental stressors (elementary exchanges)``
+--------------------------------------------------
 File: STR.csv
 Data frame containing all basic information about the different environmental stressors. 
 
@@ -72,8 +72,8 @@ Columns
 
 
 
-G_act
------
+``G_act``
+---------
 Pandas DataFrame listing all environmental exchanges (rows) per activity (columns):
 
 Index
