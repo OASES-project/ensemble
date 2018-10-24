@@ -96,7 +96,7 @@ class Ecospold2Matrix(object):
                  save_interm=True, PRO_order=['ISIC', 'activityName'],
                  STR_order=['comp', 'name', 'subcomp'],
                  verbose=True, version_name='ecoinvent31',
-                 unlinked = True):
+                 unlinked = True, remove_markets=True):
 
         """ Defining an ecospold2matrix object, with key parameters that
         determine how the data will be processes.
@@ -230,8 +230,8 @@ class Ecospold2Matrix(object):
         self.STR_order = STR_order
 
         # DATASETS UNLINKED/UNALLOCATED
-        self.unlinked = unlinked
-
+        self.unlinked = unlinked                # Is the data (spold files) linked and allocated or not. Default = True data is NOT linked
+        self.remove_markets = remove_markets    # If the data is unlinked, remove the markets see function self.remove_Markets
 
         # CREATE DIRECTORIES IF NOT IN EXISTENCE
         if out_dir and not os.path.exists(self.out_dir):
@@ -471,6 +471,8 @@ class Ecospold2Matrix(object):
         self.complement_labels()
 
         # Arrange as supply and use
+        if self.remove_markets is True:
+            self.remove_Markets()
         self.build_sut(make_untraceable)
 
         # Save to file
@@ -1581,6 +1583,38 @@ class Ecospold2Matrix(object):
 
         self.Z = self.A.multiply(q, axis=1).reindex_like(self.A)
         self.G_pro = self.F.multiply(q, axis=1).reindex_like(self.F)
+    
+    def remove_Markets(self):
+        """ If the data are unlinked, markets are empty, that is nothing is 
+        linked to the market yet, move the use flows (inflows, e.g. transport,
+        losses, etc) from the markets to use flows in the activities using
+        the reference product of the market.
+        """
+        
+        #first check if the the data is actually considered to be unlinked.
+        #If not, warn the user and log. Potentially ask for user input
+        if self.unlinked is False:
+            var = input("Data are treated as linked and allocated, are you \n
+                         sure you want to remove the markets? [y/n]: ")
+            while var not in ['y','n']:
+                var = input("Invalid input! Please select a valid option! \n
+                             Data are treated as linked and allocated, are you \n
+                             sure you want to remove the markets? [y/n]: ")
+            if var == 'n': 
+                self.log.info('Not removing markets, choice made through user input.')
+                return 0
+            
+            #If the code gets here, var must be 'y':
+            self.log.warning("Remove markets: Data are linked and allocated, 
+                              removing markets nonetheless. Choice made through user input")
+        
+        
+
+        #This function does not do anything at the moment as we decided to use ocelot
+        #the linking/allocation. 
+
+
+        pass
 
     def build_sut(self, make_untraceable=False):
         """ Arranges flow data as Suply and Use Tables and extensions
