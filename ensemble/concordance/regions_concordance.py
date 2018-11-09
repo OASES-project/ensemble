@@ -19,8 +19,13 @@ import pdb
 import sys
 sys.path.append("../ecoparser/")
 import make_regiondict
+import constructive_geometries as cg
 
 #%%
+
+
+
+
 
 def BuildConcordance(ecoDir, exioDir, countryCodes, outDir):
     geoDict_ei = make_regiondict.GeoDict(ecoDir,returnDict=True)
@@ -28,22 +33,92 @@ def BuildConcordance(ecoDir, exioDir, countryCodes, outDir):
                           list(geoDict_ei.values())]).T, 
                           columns=['Code', 'Name'])
     del geoDict_ei
-    regionFile_ex = os.path.join(exioDir,'countries.csv')
+    regionFile_ex = os.path.join(exioDir,'EXIOBASE_CountryMapping_Master_20170320.csv')
     regionDf_ex = pd.read_csv(regionFile_ex, header=0, index_col=0)
-
+    
+    #split country-province codes e.g.: CN-.. to only contain country code e.g.: CN
     geoDf_ei = ParseCombiCodes(geoDf_ei)
-    #now get a table of countries bby continent:
-    if countryCodes:
-        print("in the future need to read country codes from file: {}".formtat(
-              countryCodes))
-    else:
-        countries_by_continent = FetchCountryListFromWiki()
-    #Now merge DataFrames in two steps:
-    step_1 = geoDf_ei.join(countries_by_continent.set_index('a-2'), on='Code_2', lsuffix='_eco', rsuffix='_cc')
-    step_2 = step_1.merge(regionDf_ex, how='left', left_on='Code_2', right_on='DESIRE code')
-    step_2['flag'] = [np.NaN for i in range(len(step_2))] #add a flag column for later use
+    
+    #merge eco and exio country list on iso codes
+    countryConcord = geoDf_ei.merge(regionDf_ex, left_on='Code_2', right_on='ISO2', how='left', suffixes=('_eco', '_exio'))
+    notMatched = countryConcord.loc[countryConcord['DESIRE code'].isnull()] #these are mostly the aggregate regions and some exceptions (i.e. XK)
+    regionDict = BuildRegionDict(notMatched.Code.values)
+    
+        
 
     return
+
+def GetDesireCode(ecoCode, countryConcord, regionDict):
+    '''
+    Input: ecoinvent region (code)
+    Output: DESIRE (exiobase) code
+    This function returns the DESIRE code (EXIO) from eco code input
+    
+    WARNING: Does not throw error when ecoCode does not have a valid exiobase mapping
+    instead returns a None.
+    '''
+    if countryConcord.set_index('Code').loc[ecoCode,'DESIRE code'] is not np.NaN:
+        desireCode = countryConcord.set_index('Code').loc[ecoCode,'DESIRE code']
+    else:
+        desireCode = regionDict[ecoCode]
+    return desireCode
+
+
+def BuildRegionDict(geo_codes):
+    '''
+    Input: list of ecoinvent regions (ones that are not matched on a 
+                                         country basis)
+    Return: dictionary{region: list of countries in region}
+
+    Builds a regionDict where regionDict['region'] returns a
+    list of the country codes that belong to the region. 
+    There are a few regions that do not contain countries or are not
+    present in constructive geometries, those will get a None as return.
+    '''
+    region_mapping = {}
+    for name in geo_codes:
+    #GLOBAL and RoW need to be handled differently
+        if name not in ['RoW', 'GLO']:    
+            try: 
+                region_mapping[name] =  CountryList(name)
+            except KeyError:
+                region_mapping[name] = None
+    return region_mapping
+
+
+def CountryList(GEO):
+    '''
+    Input: ecoinvent region
+    Return: list of country codes belonging to the 'region'
+
+    Function returns a list of the country iso2 codes for the ecoinvent region
+    in the input. Input is either a tuple ('ecoinvent', 'region') or just the
+    just the 'region'. In the latter case the topology 'ecoinvent' is assumed.
+    See documentation of constructive geometries at:
+    https://github.com/cmutel/constructive_geometries
+    '''
+    geomatcher = cg.Geomatcher()
+    if not geomatcher.contained(GEO, include_self=False) == []:
+        countries = []
+        for geo in geomatcher.contained(GEO, include_self=False):
+            #print(geo, ': ', geomatcher.contained(geo, include_self=False))
+            if type(geo)==tuple:
+                #print(tuple)
+                for subgeo in geomatcher.contained(geo, include_self=False):
+                    if subgeo not in geomatcher.contained(GEO):
+                        countries.append(subgeo)
+                    elif geo[1] == 'CA-QC' and 'CA' not in countries:
+                        countries.append('CA')
+                        #This is an exception as the 'Québec, HQ distribution network' 
+                        #only contains CA-QC which is an (econinvent, CA-QC) tuple.
+            elif type(geo) == str and len(geo) == 2:
+                #print('country')
+                countries.append(geo)
+            else: 
+                print(geo)
+    else:
+        return None
+    return countries
 
 
 def FetchCountryListFromWiki():
@@ -96,10 +171,10 @@ def ParseArgs():
     
     parser.add_argument("-E","--exiodir", type=str, dest='exio_dir', 
                         default="/home/jakobs/data/EXIOBASE/",
-                        help="Directory containing the countries.csv file,\n\
+                        help="Directory containing the \n\
+                        EXIOBASE_CountryMapping_Master_20170320.csv file,\n\
                         This is a csv version of the tab countries in the\n\
-                        supplementary material 9 from Stadler et al. 2018\n\
-                        DOI: 10.1111/jiec.12715")
+                        EXIOBASE_CountryMapping_Master_20170320.xlsx")
     
     parser.add_argument("-c", "--cc", type=str, dest="countryCodes",
                         default=None, help="path to file containing \n\
