@@ -3,7 +3,7 @@
 Created on Mon Okt 29 2018
 @author: arthur jakobs
 
-This script creates a concordance file for the geographical regions in
+This script containsa functions to return condordance of products in
 in ecoinvent and exiobase. 
 """
 
@@ -25,7 +25,7 @@ import pickle
 
 
 
-class RegionConcordance(object):
+class ProductConcordance(object):
     '''
     Object Class that builds the relevant concordance dataframes and
     dictionaries. Main function after initinalisation via BuildConcordance is
@@ -41,9 +41,6 @@ class RegionConcordance(object):
         self.outDir = outDir
         self.saveConcordance = saveConcordance
         self.pickleFile = pickleFile
-        self.NotInConcordance = [] #a list of ecoinvent regions not present in 
-                                   #concordance. Currently also not being used
-                                   #in ecoinvent 3.5
 
     def __repr__(self):
         return "Instance of class '{}'".format(self.__class__.__name__)
@@ -81,9 +78,6 @@ class RegionConcordance(object):
         regionFile_ex = os.path.join(self.exioDir,
                          'EXIOBASE_CountryMapping_Master_20170320.csv')
         regionDf_ex = pd.read_csv(regionFile_ex, header=0, index_col=0)
-        #South Sudan, Kosovo and Namibia do not have an iso2 code, change this:
-        regionDf_ex.loc[regionDf_ex['ISO3'].isin(['KSV','NAM', 'SSD']), 
-                        'ISO2'] = ['XK', 'NA', 'SS']
         
         #split country-province codes e.g.: CN-..
         #to only contain country code e.g.: CN
@@ -105,7 +99,7 @@ class RegionConcordance(object):
         return
 
 
-    def GetDesireCode(self, ecoCode, excluded=None):
+    def GetDesireCode(self, ecoCode):
         '''
         Input: ecoinvent region (code)
         Output: DESIRE (exiobase) code
@@ -118,25 +112,13 @@ class RegionConcordance(object):
         if not np.isnan(value):
             print('Region in main concordance')
             desireCode = value
-        elif ecoCode != 'RoW':
+        else:
             print('Looking up region via region regiondict')
             desireCode = self.regionDict[ecoCode]
-        elif ecoCode == 'RoW':
-            if excluded:
-                row = self.RoW(excluded)
-                desireCode = self.countryConcord.set_index('Code').loc[
-                                    row,'DESIRE code'].unique().tolist()
-                #get rid of potential nans from islands as Guernsey or Jersey
-                #that originate from the row process but are not (ei3.5 in the 
-                #process data. 
-                if np.nan in desireCode: desireCode.remove(np.nan)
-            else: 
-                print('No region given to exlude from Globally\n\
-                Returning GLOBAL')
-                desireCode = self.returnDict['GLO']
+        
         return desireCode
-   
-
+    
+    
     def BuildRegionDict(self, geo_codes):
         '''
         Input: list of ecoinvent regions (ones that are not matched on a 
@@ -149,52 +131,20 @@ class RegionConcordance(object):
         present in constructive geometries, those will get a None as return.
         '''
         region_mapping = {}
-        exceptions = {'RFC':'US', 'SERC':'US', 'TRE':'US',
-                      'WECC, US only':'US', 'SPP':'US',
-                      'NPCC, US only':'US', 'ASCC':'US',
-                      'HICC':'US', 'MRO, US only':'US',
-                      'SGCC':'CN', 'FRCC':'US', 'CSG':'CN'}
         for name in geo_codes:
         #GLOBAL and RoW need to be handled differently
-            if name in exceptions.keys():
-                region_mapping[name] = exceptions[name]
-            
-            elif name == 'GLO':
-                glo = self.countryConcord['DESIRE code'][
-                                          self.countryConcord['DESIRE code'
-                                          ].notnull()].unique().tolist()
-                region_mapping[name] = glo
-            elif name != 'RoW':
+            if name not in ['RoW', 'GLO']:    
                 try: 
-                    countrylist =  self.CountryList(name)
-                    
-                    if countrylist:
-                        desire_list = self.countryConcord.set_index('Code').loc[
-                                    countrylist,'DESIRE code'].unique().tolist()
-                        region_mapping[name]= desire_list
-                    else:
-                        region_mapping[name] = None
+                    region_mapping[name] =  self.CountryList(name)
                 except KeyError:
                     region_mapping[name] = None
-                except TypeError:
-                    print('TypeError')
-                    pdb.set_trace()
         
         self.regionDict = region_mapping
         
         return 
 
-    def RoW(self,excluded):
-        countrylist = self.CountryList(excluded, row=True)
-        return countrylist
 
-    def assert_list(self, something):
-        if type(something) is not list:
-            return [something]
-        else:
-            return something
-
-    def CountryList(self, GEO, row=False):
+    def CountryList(self, GEO):
         '''
         Input: ecoinvent region
         Return: list of country codes belonging to the 'region'
@@ -205,46 +155,30 @@ class RegionConcordance(object):
         'ecoinvent' is assumed. See documentation of constructive geometries
         at: https://github.com/cmutel/constructive_geometries
         '''
-
         geomatcher = cg.Geomatcher()
-        if row:
-            excluded = self.assert_list(GEO)
-            with cg.resolved_row(excluded, geomatcher) as g:
-                geolist = g.contained('RoW', include_self=False)                    
-        else:
-            geolist = geomatcher.contained(GEO, include_self=False)
-        if not geolist == []:
+        if not geomatcher.contained(GEO, include_self=False) == []:
             countries = []
-            for geo in geolist:
+            for geo in geomatcher.contained(GEO, include_self=False):
                 #print(geo, ': ', geomatcher.contained(geo, include_self=False))
                 if type(geo)==tuple:
-                    if geomatcher.contained(geo, include_self=False) != []:
-                        for subgeo in geomatcher.contained(geo, 
-                                                           include_self=False):
-                            if subgeo not in geolist:
-                                countries.append(subgeo)
-                    else:
-                        #Some exceptions to be handled.                  
-                        region = geo[1]
-                        splitreg = region.split('-') #provinces are all of the form (#)##-##
-                        if len(splitreg) == 2 and len(splitreg[0]) == 2:
-                            countries.append(splitreg[0])
-                        elif len(splitreg) == 2 and splitreg[0] == 'AUS':
-                            countries.append('AU')
-                        elif region.startswith('Russia'):
-                            countries.append('RU')
-                        else:
-                            self.NotInConcordance.append(geo[1])
+                    #print(tuple)
+                    for subgeo in geomatcher.contained(geo, include_self=False):
+                        if subgeo not in geomatcher.contained(GEO):
+                            countries.append(subgeo)
+                        elif geo[1] == 'CA-QC' and 'CA' not in countries:
+                            countries.append('CA')
+                            #This is an exception as the 
+                            #'Québec, HQ distribution network' only contains
+                            #CA-QC which is an (econinvent, CA-QC) tuple.
                 elif type(geo) == str and len(geo) == 2:
                     #print('country')
                     countries.append(geo)
                 else: 
-                    #pass
-                    print(geo, 'empty')
+                    print(geo)
         else:
             return None
-        #only return a unique list
-        return np.unique(countries).tolist()
+        return countries
+
 
     def ParseCombiCodes(self, df):
         '''Splits the code names with a -
@@ -335,6 +269,6 @@ if __name__ == "__main__":
     print("\n")
     CC = RegionConcordance(*vars(args).values())
     CC.GetConcordance()
-    row_CH = CC.GetDesireCode('RoW', 'CH')
-    print('RoW without Switzerland', row_CH, len(row_CH))
+    print(CC.GetDesireCode('UN-EASIA'))
+    pdb.set_trace()
 
