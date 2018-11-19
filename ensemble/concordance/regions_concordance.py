@@ -127,7 +127,8 @@ class RegionConcordance(object):
                 #get rid of potential nans from islands as Guernsey or Jersey
                 #that originate from the row process but are not (ei3.5 in the
                 #process data.
-                if np.nan in desireCode: desireCode.remove(np.nan)
+                if np.nan in desireCode:
+                    desireCode.remove(np.nan)
             else:
                 print('No region given to exlude from Globally\n\
                 Returning GLOBAL')
@@ -265,8 +266,7 @@ class RegionConcordance(object):
         if not os.path.exists(outPath):
             os.makedirs(outPath)
             print("Created directory {}".format(outPath))
-        return
-    
+        return 
 
     def SaveConcordance(self):
         print('Saving concordance...')
@@ -285,10 +285,8 @@ class RegionConcordance(object):
 def assert_list(something):
     if not isinstance(something, list):
         return [something]
-    else:
-        return something
+    return something
     
-
 def ParseArgs():
     '''
     ParsArgs parser the command line options
@@ -325,8 +323,6 @@ def ParseArgs():
     print("Arguments parsed.")
     return args
 
-
-
 if __name__ == "__main__":
     args = ParseArgs()
     print("Running with the following arguments")
@@ -337,4 +333,3 @@ if __name__ == "__main__":
     CC.GetConcordance()
     row_CH = CC.GetDesireCode('RoW', 'CH')
     print('RoW without Switzerland', row_CH, len(row_CH))
-

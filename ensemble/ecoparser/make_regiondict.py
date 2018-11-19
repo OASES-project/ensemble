@@ -43,11 +43,11 @@ def GeoDict(eco_dir, outfile=None, outdir=None, Pickle=False, returnDict=False):
             geoNames.append(str(child.name))
             geoAbbrevs.append(str(child.shortname)) 
     geoDict = {key:value for (key, value) in zip(geoAbbrevs, geoNames)}
-    if returnDict == True:
+    if returnDict:
         return geoDict
     else:
         Write2File(outfile, outdir, eco_dir, Pickle, geoDict)
-        return
+    return
 
 
 

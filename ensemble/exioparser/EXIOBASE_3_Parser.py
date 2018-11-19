@@ -80,7 +80,7 @@ def Main(args):
     
     Nsize = MRIO_A.shape[0]
     #Calculate Leontief Inverse
-    if args.Leontief == True:
+    if args.Leontief:
         print("Calculating Leontief inverse. This may take a while..")
         I = np.identity(Nsize)
         MRIO_L = np.linalg.inv(I-MRIO_A)
@@ -101,7 +101,7 @@ def Main(args):
     print("Done calculating S")
 
     #Calculate Z
-    if args.include_Z == True:
+    if args.include_Z:
         print("Calculating Z")
         MRIO_Z = MRIO_A.dot(np.diag(MRIO_X))
     
@@ -120,14 +120,14 @@ def Main(args):
              'EB3_ProductNames163':MRIO_Products,
              'EB3_RegionList':MRIO_Country}
 
-    if args.include_Z == True and args.Leontief == True:
+    if args.include_Z and args.Leontief:
         filestring = 'EXIOBASE_IO_incl_Z_L_Mon_49R'
         mdict['EB3_L_ITC'] = MRIO_L
         mdict['EB3_Z_ITC'] = MRIO_Z
-    elif args.include_Z == True:
+    elif args.include_Z:
         filestring = 'EXIOBASE_IO_incl_Z_Mon_49R'
         mdict['EB3_Z_ITC'] = MRIO_Z
-    elif args.Leontief == True:
+    elif args.Leontief:
         filestring = 'EXIOBASE_IO_incl_L_Mon_49R' 
         mdict['EB3_L_ITC'] = MRIO_L
     else:

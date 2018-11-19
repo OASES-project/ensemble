@@ -127,7 +127,8 @@ class RegionConcordance(object):
                 #get rid of potential nans from islands as Guernsey or Jersey
                 #that originate from the row process but are not (ei3.5 in the
                 #process data.
-                if np.nan in desireCode: desireCode.remove(np.nan)
+                if np.nan in desireCode:
+                    desireCode.remove(np.nan)
             else:
                 print('No region given to exlude from Globally\n\
                 Returning GLOBAL')
@@ -285,8 +286,7 @@ class RegionConcordance(object):
 def assert_list(something):
     if not isinstance(something, list):
         return [something]
-    else:
-        return something
+    return something
     
 
 def ParseArgs():
