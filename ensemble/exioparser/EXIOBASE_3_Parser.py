@@ -9,23 +9,8 @@ Edited on Thu Oct 17 2018
 This script takes the raw EXIObase 3 files and parses them into
 numpy matrices that are then stored in a .mat binary file.
 Also calulates Z and L matrices (optional)
-For usage see EXIOBASE_3_parser --help
-"""
+For usage see EXIOBASE_3_parser --h
 
-#%%
-import numpy as np
-import scipy.io
-import scipy
-import pandas as pd
-import os
-import datetime
-import argparse
-#import pdb
-#%%
-
-include_Z = True
-def Main(args):
-    
     mainPath = args.exio_dir
     subpath = 'satellite'
 

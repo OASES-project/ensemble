@@ -82,7 +82,7 @@ class RegionConcordance(object):
         #South Sudan, Kosovo and Namibia do not have an iso2 code, change this:
         regionDf_ex.loc[regionDf_ex['ISO3'].isin(['KSV','NAM', 'SSD']),
                         'ISO2'] = ['XK', 'NA', 'SS']
-        
+
         #split country-province codes e.g.: CN-..
         #to only contain country code e.g.: CN
         geoDf_ei = self.ParseCombiCodes(geoDf_ei)
