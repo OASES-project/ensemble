@@ -1,4 +1,4 @@
-#! /bin/usr/env python
+#! /bin/usr/env pytho
 '''
 author: Arthur Jakobs
 Okt 25 2018
@@ -14,28 +14,51 @@ import json
 import pickle
 import argparse
 
-def GeoDict(args):
+
+def GeoDict(eco_dir, outfile=None, outdir=None, Pickle=False, returnDict=False):
     '''
     GeoDict is a function that parses the ecoinvent
     Geographies.xml file into a dictionary and saves
     that into a json file and optionally a pickle file.
+    
+    Usage:
+    'eco_dir':          "Directory containing the ecoinvent meta data,\n\
+                        i.e. the ecoinvent MasterData folder."
+    
+    'outfile':          "Optional filename for output. Otherwise saved as Geographies.json")
+
+    'outdir':           "Optional dir for output. Otherwise saved in  input dir")
+    
+    'pickle':           "If True saves output as pickle file too")
+    
+    'returnDict':       "If True, main function returns dictionary")
+                        #for later use as function
+
     '''
     geoNames = []
     geoAbbrevs = []
-    root = objectify.parse(os.path.join(args.eco_dir, 'Geographies.xml')).getroot()
+    root = objectify.parse(os.path.join(eco_dir, 'Geographies.xml')).getroot()
     for child in root.getchildren():
         if hasattr(child, 'name'):
             geoNames.append(str(child.name))
             geoAbbrevs.append(str(child.shortname)) 
     geoDict = {key:value for (key, value) in zip(geoAbbrevs, geoNames)}
+    if returnDict:
+        return geoDict
+    else:
+        Write2File(outfile, outdir, eco_dir, Pickle, geoDict)
+    return
 
-    outPath = Check_Output_dir(args)
-    fileName = FileName(args)
+
+
+def Write2File(outfile, outdir, eco_dir, Pickle, geoDict):
+    outPath = Check_Output_dir(outdir, eco_dir)
+    fileName = FileName(outfile)
     fileString = os.path.join(outPath,fileName)
     with open(fileString, 'w') as fh:
         json.dump(geoDict, fh)
     print('dictionary written to:\n{}'.format(fileString))
-    if args.pickle:
+    if Pickle:
         pickleName = os.path.splitext(fileName)[0]+'.pickle'
         fileString = os.path.join(outPath, pickleName)
         with open(fileString, 'wb') as fh:
@@ -43,26 +66,26 @@ def GeoDict(args):
         print('dictionary written to:\n{}'.format(fileString))
     return
 
-def FileName(args):
+def FileName(outfile):
     '''
     Returns a file name given as argument,
     otherwise the default name.
     '''
-    if args.outfile:
-        filename = args.outfile
+    if outfile:
+        filename = outfile
     else:
         filename = 'Geographies.json'
     return filename
 
-def Check_Output_dir(args):
+def Check_Output_dir(outdir, eco_dir):
     '''
     Returns a output dir and
     creates it if it does not exist
     '''
-    if args.outdir:
-        outPath = args.outdir
+    if outdir:
+        outPath = outdir
     else:
-        outPath = args.eco_dir
+        outPath = eco_dir
     if not os.path.exists(outPath):
         os.makedirs(outPath)
         print("Created directory {}".format(outPath))
@@ -88,10 +111,14 @@ def ParseArgs():
                         default=None,
                         help="Optional dir for output. Otherwise saved in  input dir")
     
-    parser.add_argument("-p","--pickle", dest='pickle',
+    parser.add_argument("-p","--pickle", dest='Pickle',
                         action='store_true',
                         help="If True saves output as pickle file too")
-
+    
+    parser.add_argument("-r","--returndict", dest='returnDict',
+                        action='store_true',
+                        help="If True, main function returns dictionary")
+                        #for later use as function
 
     args = parser.parse_args()
     
@@ -105,6 +132,6 @@ if __name__ == "__main__":
     print('Running with following arguments:')
     for key, path in vars(args).items():
         print(key,': ', path)
-    GeoDict(args)
+    GeoDict(*vars(args).values())
 
     
