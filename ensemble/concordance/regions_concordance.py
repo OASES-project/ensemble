@@ -134,14 +134,14 @@ class RegionConcordance(object):
                 Returning GLOBAL')
                 desireCode = self.returnDict['GLO']
         return desireCode
-   
+
 
     def BuildRegionDict(self, geo_codes):
         '''
         Input: list of ecoinvent regions (ones that are not matched on a
                                              country basis)
         Return: dictionary{region: list of countries in region}
-    
+
         Builds a regionDict where regionDict['region'] returns a
         list of the country codes that belong to the region.
         There are a few regions that do not contain countries or are not
@@ -233,10 +233,10 @@ class RegionConcordance(object):
                     #print('country')
                     countries.append(geo)
                 else:
-                    #If no tuple, (meaning no predefined region as all regions 
-                    #in from the constructive geomtery package follow the 
+                    #If no tuple, (meaning no predefined region as all regions
+                    #in from the constructive geomtery package follow the
                     #following form (topo, region). Then it must have been
-                    #handled in the exceptions. 
+                    #handled in the exceptions.
                     pass
                     #print(geo, 'empty')
         else:
@@ -270,7 +270,7 @@ class RegionConcordance(object):
         if not os.path.exists(outPath):
             os.makedirs(outPath)
             print("Created directory {}".format(outPath))
-        return 
+        return
 
     def SaveConcordance(self):
         print('Saving concordance...')
