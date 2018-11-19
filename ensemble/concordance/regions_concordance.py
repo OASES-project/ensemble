@@ -31,8 +31,8 @@ class RegionConcordance(object):
     dictionaries. Main function after initinalisation via BuildConcordance is
     GetDesireCode(ecoCode), which returns the DESIRE/EXIOBASE region code given
     the ecoinvent region code (ecoCode).
-    
-    Needs 
+
+    Needs
     '''
     def __init__(self, ecoDir, exioDir, outDir, pickleFile=None,
                  saveConcordance=True):
@@ -41,7 +41,7 @@ class RegionConcordance(object):
         self.outDir = outDir
         self.saveConcordance = saveConcordance
         self.pickleFile = pickleFile
-        self.NotInConcordance = [] #a list of ecoinvent regions not present in 
+        self.NotInConcordance = [] #a list of ecoinvent regions not present in
                                    #concordance. Currently also not being used
                                    #in ecoinvent 3.5
 
@@ -76,18 +76,18 @@ class RegionConcordance(object):
         print('Building concordance...')
         geoDict_ei = make_regiondict.GeoDict(self.ecoDir,returnDict=True)
         geoDf_ei = pd.DataFrame(data = np.array([list(geoDict_ei.keys()),
-                              list(geoDict_ei.values())]).T, 
+                              list(geoDict_ei.values())]).T,
                               columns=['Code', 'Name'])
         regionFile_ex = os.path.join(self.exioDir,
                          'EXIOBASE_CountryMapping_Master_20170320.csv')
         regionDf_ex = pd.read_csv(regionFile_ex, header=0, index_col=0)
         #South Sudan, Kosovo and Namibia do not have an iso2 code, change this:
-        regionDf_ex.loc[regionDf_ex['ISO3'].isin(['KSV','NAM', 'SSD']), 
+        regionDf_ex.loc[regionDf_ex['ISO3'].isin(['KSV','NAM', 'SSD']),
                         'ISO2'] = ['XK', 'NA', 'SS']
         
         #split country-province codes e.g.: CN-..
         #to only contain country code e.g.: CN
-        geoDf_ei = self.ParseCombiCodes(geoDf_ei)
+        self.ParseCombiCodes()
         
         #merge eco and exio country list on iso codes
         self.countryConcord = geoDf_ei.merge(regionDf_ex, left_on='Code_2',
@@ -95,7 +95,7 @@ class RegionConcordance(object):
                                              suffixes=('_eco', '_exio'))
         
         not_matched_mask = self.countryConcord['DESIRE code'].isnull()
-        self.notMatched = self.countryConcord.loc[not_matched_mask] 
+        self.notMatched = self.countryConcord.loc[not_matched_mask]
         #these are mostly the aggregate regions and some exceptions (i.e. XK)
         self.BuildRegionDict(self.notMatched.Code.values)
         
@@ -127,8 +127,8 @@ class RegionConcordance(object):
                 desireCode = self.countryConcord.set_index('Code').loc[
                                     row,'DESIRE code'].unique().tolist()
                 #get rid of potential nans from islands as Guernsey or Jersey
-                #that originate from the row process but are not (ei3.5 in the 
-                #process data. 
+                #that originate from the row process but are not (ei3.5 in the
+                #process data.
                 if np.nan in desireCode: desireCode.remove(np.nan)
             else: 
                 print('No region given to exlude from Globally\n\
@@ -139,12 +139,12 @@ class RegionConcordance(object):
 
     def BuildRegionDict(self, geo_codes):
         '''
-        Input: list of ecoinvent regions (ones that are not matched on a 
+        Input: list of ecoinvent regions (ones that are not matched on a
                                              country basis)
         Return: dictionary{region: list of countries in region}
     
         Builds a regionDict where regionDict['region'] returns a
-        list of the country codes that belong to the region. 
+        list of the country codes that belong to the region.
         There are a few regions that do not contain countries or are not
         present in constructive geometries, those will get a None as return.
         '''
@@ -187,13 +187,8 @@ class RegionConcordance(object):
     def RoW(self,excluded):
         countrylist = self.CountryList(excluded, row=True)
         return countrylist
-
-    def assert_list(self, something):
-        if type(something) is not list:
-            return [something]
-        else:
-            return something
-
+    
+    
     def CountryList(self, GEO, row=False):
         '''
         Input: ecoinvent region
@@ -208,23 +203,23 @@ class RegionConcordance(object):
 
         geomatcher = cg.Geomatcher()
         if row:
-            excluded = self.assert_list(GEO)
+            excluded = assert_list(GEO)
             with cg.resolved_row(excluded, geomatcher) as g:
-                geolist = g.contained('RoW', include_self=False)                    
+                geolist = g.contained('RoW', include_self=False)
         else:
             geolist = geomatcher.contained(GEO, include_self=False)
         if not geolist == []:
             countries = []
             for geo in geolist:
                 #print(geo, ': ', geomatcher.contained(geo, include_self=False))
-                if type(geo)==tuple:
+                if isinstance(geo,tuple):
                     if geomatcher.contained(geo, include_self=False) != []:
                         for subgeo in geomatcher.contained(geo, 
                                                            include_self=False):
                             if subgeo not in geolist:
                                 countries.append(subgeo)
                     else:
-                        #Some exceptions to be handled.                  
+                        #Some exceptions to be handled.
                         region = geo[1]
                         splitreg = region.split('-') #provinces are all of the form (#)##-##
                         if len(splitreg) == 2 and len(splitreg[0]) == 2:
@@ -246,37 +241,39 @@ class RegionConcordance(object):
         #only return a unique list
         return np.unique(countries).tolist()
 
-    def ParseCombiCodes(self, df):
+    def ParseCombiCodes(self):
         '''Splits the code names with a -
         into single 2 letter codes. I.e.
         get rid of province level detail'''
         #first split codes at -
-        df['Code_2'] = df['Code'].str.split('-')
+        self.geoDf_ei['Code_2'] = self.geoDf_ei['Code'].str.split('-')
         #Then handle case individually
-        for i in range(len(df['Code_2'].values)):
-            if len(df.Code_2.iloc[i]) > 1:
-                if df.Code_2.iloc[i][0] == 'UN':
+        for i in range(len(self.geoDf_ei['Code_2'].values)):
+            if len(self.geoDf_ei.Code_2.iloc[i]) > 1:
+                if self.geoDf_ei.Code_2.iloc[i][0] == 'UN':
                     #if one of the #UN regions, only save the region part of it
-                    df.Code_2.iloc[i] = df.Code_2.iloc[i][1]
-                elif df.Code_2.iloc[i][0] == 'AUS':
-                    df.Code_2.iloc[i] = 'AU'
+                    self.geoDf_ei.Code_2.iloc[i] =\
+                        self.geoDf_ei.Code_2.iloc[i][1]
+                elif self.geoDf_ei.Code_2.iloc[i][0] == 'AUS':
+                    self.geoDf_ei.Code_2.iloc[i] = 'AU'
                 else:
-                    df.Code_2.iloc[i] = df.Code_2.iloc[i][0]
+                    self.geoDf_ei.Code_2.iloc[i] =\
+                        self.geoDf_ei.Code_2.iloc[i][0]
             else:
-                df.Code_2.iloc[i] = df.Code_2.iloc[i][0]
-        return df
+                self.geoDf_ei.Code_2.iloc[i] = self.geoDf_ei.Code_2.iloc[i][0]
+        return
     
-    
+    @staticmethod
     def Check_Output_dir(self, outPath):
         if not os.path.exists(outPath):
             os.makedirs(outPath)
             print("Created directory {}".format(outPath))
-        return outPath
+        return
     
 
     def SaveConcordance(self):
         print('Saving concordance...')
-        outPath = self.Check_Output_dir(self.outDir)
+        self.Check_Output_dir(self.outDir)
         outFile = os.path.join(self.outDir,
                                'EcoExioRegionConcordance_{}.pickle'.format(
                                datetime.datetime.date(datetime.datetime.now())))
@@ -288,32 +285,38 @@ class RegionConcordance(object):
         print('Concordance saved to: {}'.format(outFile))
         return
 
+def assert_list(something):
+    if type(something) is not list:
+        return [something]
+    else:
+        return something
+    
 
 def ParseArgs():
     '''
-    ParsArgs parser the command line options 
+    ParsArgs parser the command line options
     and returns them as a Namespace object
     '''
     print("Parsing arguments...")
     parser = argparse.ArgumentParser()
-    parser.add_argument("-e","--dir", type=str, dest='eco_dir', 
+    parser.add_argument("-e","--dir", type=str, dest='eco_dir',
                         default='/home/jakobs/data/ecoinvent/ecoinvent 3.5_cutoff_ecoSpold02/ecoinvent 3.5_cutoff_ecoSpold02/MasterData',
                         help="Directory containing the ecoinvent meta data,\n\
                         i.e. the ecoinvent MasterData folder.")
     
-    parser.add_argument("-E","--exiodir", type=str, dest='exio_dir', 
+    parser.add_argument("-E","--exiodir", type=str, dest='exio_dir',
                         default="/home/jakobs/data/EXIOBASE/",
                         help="Directory containing the \n\
                         EXIOBASE_CountryMapping_Master_20170320.csv file,\n\
                         This is a csv version of the tab countries in the\n\
                         EXIOBASE_CountryMapping_Master_20170320.xlsx")
     
-    parser.add_argument("-o","--outdir", type=str, dest='outdir', 
+    parser.add_argument("-o","--outdir", type=str, dest='outdir',
                         default='/home/jakobs/data/EcoBase/',
                         help="Optional dir for output. Otherwise saved in \
                         subfolder in  input dir")
     
-    parser.add_argument("-f","--picklefile", type=str, dest='picklefile', 
+    parser.add_argument("-f","--picklefile", type=str, dest='picklefile',
                         default=None, help="Concordance pickle file to load\
                         from.")
     
@@ -328,7 +331,7 @@ def ParseArgs():
 
 
 if __name__ == "__main__":
-    args = ParseArgs()    
+    args = ParseArgs()
     print("Running with the following arguments")
     for key, path in vars(args).items():
         print(key,': ', path)
