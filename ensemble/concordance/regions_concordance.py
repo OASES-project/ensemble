@@ -4,7 +4,7 @@ Created on Mon Okt 29 2018
 @author: arthur jakobs
 
 This script creates a concordance file for the geographical regions in
-in ecoinvent and exiobase. 
+in ecoinvent and exiobase.
 """
 
 #%%
@@ -65,7 +65,7 @@ class RegionConcordance(object):
     def BuildConcordance(self):
         '''
         This function builds the necessary DataFrames and Dictionaries:
- 
+
         self.countryConcord :       Main concordance DataFrame
         self.notMatched = c :       DataFrame containing the regions that
                                     did not match on their iso code
@@ -232,9 +232,13 @@ class RegionConcordance(object):
                 elif isinstance(geo,str) and len(geo) == 2:
                     #print('country')
                     countries.append(geo)
-                else: 
-                    #pass
-                    print(geo, 'empty')
+                else:
+                    #If no tuple, (meaning no predefined region as all regions 
+                    #in from the constructive geomtery package follow the 
+                    #following form (topo, region). Then it must have been
+                    #handled in the exceptions. 
+                    pass
+                    #print(geo, 'empty')
         else:
             return None
         #only return a unique list
