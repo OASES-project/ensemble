@@ -13,7 +13,6 @@ import os
 import json
 import pickle
 import argparse
-import sys
 
 
 def GeoDict(eco_dir, outfile=None, outdir=None, Pickle=False, returnDict=False):
@@ -132,7 +131,7 @@ if __name__ == "__main__":
     args = ParseArgs()    
     print('Running with following arguments:')
     for key, path in vars(args).items():
-        print(key,': ', path)    
+        print(key,': ', path)
     GeoDict(*vars(args).values())
 
     

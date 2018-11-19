@@ -9,8 +9,6 @@ in ecoinvent and exiobase.
 
 #%%
 import numpy as np
-import scipy.io
-import scipy
 import pandas as pd
 import os
 import datetime
@@ -67,7 +65,7 @@ class RegionConcordance(object):
     def BuildConcordance(self):
         '''
         This function builds the necessary DataFrames and Dictionaries:
-       
+ 
         self.countryConcord :       Main concordance DataFrame
         self.notMatched = c :       DataFrame containing the regions that
                                     did not match on their iso code
@@ -87,7 +85,7 @@ class RegionConcordance(object):
         
         #split country-province codes e.g.: CN-..
         #to only contain country code e.g.: CN
-        self.ParseCombiCodes()
+        geoDf_ei = self.ParseCombiCodes(geoDf_ei)
         
         #merge eco and exio country list on iso codes
         self.countryConcord = geoDf_ei.merge(regionDf_ex, left_on='Code_2',
@@ -130,7 +128,7 @@ class RegionConcordance(object):
                 #that originate from the row process but are not (ei3.5 in the
                 #process data.
                 if np.nan in desireCode: desireCode.remove(np.nan)
-            else: 
+            else:
                 print('No region given to exlude from Globally\n\
                 Returning GLOBAL')
                 desireCode = self.returnDict['GLO']
@@ -165,7 +163,7 @@ class RegionConcordance(object):
                                           ].notnull()].unique().tolist()
                 region_mapping[name] = glo
             elif name != 'RoW':
-                try: 
+                try:
                     countrylist =  self.CountryList(name)
                     
                     if countrylist:
@@ -182,7 +180,7 @@ class RegionConcordance(object):
         
         self.regionDict = region_mapping
         
-        return 
+        return
 
     def RoW(self,excluded):
         countrylist = self.CountryList(excluded, row=True)
@@ -214,7 +212,7 @@ class RegionConcordance(object):
                 #print(geo, ': ', geomatcher.contained(geo, include_self=False))
                 if isinstance(geo,tuple):
                     if geomatcher.contained(geo, include_self=False) != []:
-                        for subgeo in geomatcher.contained(geo, 
+                        for subgeo in geomatcher.contained(geo,
                                                            include_self=False):
                             if subgeo not in geolist:
                                 countries.append(subgeo)
@@ -230,7 +228,7 @@ class RegionConcordance(object):
                             countries.append('RU')
                         else:
                             self.NotInConcordance.append(geo[1])
-                elif type(geo) == str and len(geo) == 2:
+                elif isinstance(geo,str) and len(geo) == 2:
                     #print('country')
                     countries.append(geo)
                 else: 
@@ -240,31 +238,30 @@ class RegionConcordance(object):
             return None
         #only return a unique list
         return np.unique(countries).tolist()
-
-    def ParseCombiCodes(self):
+    
+    @staticmethod
+    def ParseCombiCodes(df):
         '''Splits the code names with a -
         into single 2 letter codes. I.e.
         get rid of province level detail'''
         #first split codes at -
-        self.geoDf_ei['Code_2'] = self.geoDf_ei['Code'].str.split('-')
+        df['Code_2'] = df['Code'].str.split('-')
         #Then handle case individually
-        for i in range(len(self.geoDf_ei['Code_2'].values)):
-            if len(self.geoDf_ei.Code_2.iloc[i]) > 1:
-                if self.geoDf_ei.Code_2.iloc[i][0] == 'UN':
+        for i in range(len(df['Code_2'].values)):
+            if len(df.Code_2.iloc[i]) > 1:
+                if df.Code_2.iloc[i][0] == 'UN':
                     #if one of the #UN regions, only save the region part of it
-                    self.geoDf_ei.Code_2.iloc[i] =\
-                        self.geoDf_ei.Code_2.iloc[i][1]
-                elif self.geoDf_ei.Code_2.iloc[i][0] == 'AUS':
-                    self.geoDf_ei.Code_2.iloc[i] = 'AU'
+                    df.Code_2.iloc[i] = df.Code_2.iloc[i][1]
+                elif df.Code_2.iloc[i][0] == 'AUS':
+                    df.Code_2.iloc[i] = 'AU'
                 else:
-                    self.geoDf_ei.Code_2.iloc[i] =\
-                        self.geoDf_ei.Code_2.iloc[i][0]
+                    df.Code_2.iloc[i] = df.Code_2.iloc[i][0]
             else:
-                self.geoDf_ei.Code_2.iloc[i] = self.geoDf_ei.Code_2.iloc[i][0]
-        return
+                df.Code_2.iloc[i] = df.Code_2.iloc[i][0]
+        return df
     
     @staticmethod
-    def Check_Output_dir(self, outPath):
+    def Check_Output_dir(outPath):
         if not os.path.exists(outPath):
             os.makedirs(outPath)
             print("Created directory {}".format(outPath))
@@ -286,7 +283,7 @@ class RegionConcordance(object):
         return
 
 def assert_list(something):
-    if type(something) is not list:
+    if not isinstance(something, list):
         return [something]
     else:
         return something
