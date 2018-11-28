@@ -903,7 +903,7 @@ class Ecospold2Matrix(object):
 
 
         prices = pd.DataFrame(product_price_list, 
-                              columns = ['fileId'
+                              columns = ['fileId',
                                          'productId',
                                          'name',
                                          'amount',
@@ -1594,15 +1594,15 @@ class Ecospold2Matrix(object):
         losses, etc) from the markets to use flows in the activities using
         the reference product of the market.
         """
-        
+        '''
         #first check if the the data is actually considered to be unlinked.
         #If not, warn the user and log. Potentially ask for user input
         if self.unlinked is False:
-            var = input("Data are treated as linked and allocated, are you \n
+            var = input("Data are treated as linked and allocated, are you\n\
                          sure you want to remove the markets? [y/n]: ")
             while var not in ['y','n']:
-                var = input("Invalid input! Please select a valid option! \n
-                             Data are treated as linked and allocated, are you \n
+                var = input("Invalid input! Please select a valid option!\n\
+                             Data are treated as linked and allocated, are you\n\
                              sure you want to remove the markets? [y/n]: ")
             if var == 'n': 
                 self.log.info('Not removing markets, choice made through user input.')
@@ -1616,8 +1616,7 @@ class Ecospold2Matrix(object):
 
         #This function does not do anything at the moment as we decided to use ocelot
         #the linking/allocation. 
-
-
+        '''
         pass
 
     def build_sut(self, make_untraceable=False):
