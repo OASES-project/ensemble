@@ -862,8 +862,11 @@ class Ecospold2Matrix(object):
                                     elif nextlevelelem.tag == self.__PRE+'unitName':
                                         unit = nextlevelelem.text
                                     #print(nextlevelelem.tag,': ', nextlevelelem.text)
-                                product_price_list.append([entry.attrib.get('intermediateExchangeId'),name, price, unit, entry.find(self.__PRE + 'outputGroup').text])
-                                #print(entry.attrib.get('intermediateExchangeId'),name, price, unit, entry.find(self.__PRE + 'outputGroup').text])
+                                product_price_list.append([current_id, 
+                                    entry.attrib.get('intermediateExchangeId'),
+                                    name, price, unit,
+                                    entry.find(self.__PRE + 'outputGroup').text])
+                                #print(current_id,entry.attrib.get('intermediateExchangeId'),name, price, unit, entry.find(self.__PRE + 'outputGroup').text])
                         
                                 
                                 
@@ -900,7 +903,8 @@ class Ecospold2Matrix(object):
 
 
         prices = pd.DataFrame(product_price_list, 
-                              columns = ['productId',
+                              columns = ['fileId'
+                                         'productId',
                                          'name',
                                          'amount',
                                          'unit',
