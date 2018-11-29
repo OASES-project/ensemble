@@ -2,19 +2,17 @@
 Created on Mon Nov 26 2018
 @author: arthur jakobs
 
-This script creates an object of class ProductConcordance which returns a corresponding 
-EXIOBASE prodcut for an entry of ecoinvent (activityId,productId)
-The concordance is taken from the concordance matrix supplied by 
+This script creates an object of class ProductConcordance which returns a
+corresponding EXIOBASE prodcut for an entry of ecoinvent (activityId,productId)
+The concordance is taken from the concordance matrix supplied by
 Maxime Agez @ CIRAIG Montreal.
 """
 
 #%%
-import numpy as np
 import pandas as pd
 import os
 import datetime
 import argparse
-import pdb
 import pickle
 #%%
 
