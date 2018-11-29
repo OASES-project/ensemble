@@ -862,8 +862,11 @@ class Ecospold2Matrix(object):
                                     elif nextlevelelem.tag == self.__PRE+'unitName':
                                         unit = nextlevelelem.text
                                     #print(nextlevelelem.tag,': ', nextlevelelem.text)
-                                product_price_list.append([entry.attrib.get('intermediateExchangeId'),name, price, unit, entry.find(self.__PRE + 'outputGroup').text])
-                                #print(entry.attrib.get('intermediateExchangeId'),name, price, unit, entry.find(self.__PRE + 'outputGroup').text])
+                                product_price_list.append([current_id,
+                                    entry.attrib.get('intermediateExchangeId'),
+                                    name, price, unit,
+                                    entry.find(self.__PRE + 'outputGroup').text])
+                                #print(current_id,entry.attrib.get('intermediateExchangeId'),name, price, unit, entry.find(self.__PRE + 'outputGroup').text])
                         
                                 
                                 
@@ -900,7 +903,8 @@ class Ecospold2Matrix(object):
 
 
         prices = pd.DataFrame(product_price_list, 
-                              columns = ['productId',
+                              columns = ['fileId',
+                                         'productId',
                                          'name',
                                          'amount',
                                          'unit',
@@ -1590,15 +1594,15 @@ class Ecospold2Matrix(object):
         losses, etc) from the markets to use flows in the activities using
         the reference product of the market.
         """
-        
+        '''
         #first check if the the data is actually considered to be unlinked.
         #If not, warn the user and log. Potentially ask for user input
         if self.unlinked is False:
-            var = input("Data are treated as linked and allocated, are you \n
+            var = input("Data are treated as linked and allocated, are you\n\
                          sure you want to remove the markets? [y/n]: ")
             while var not in ['y','n']:
-                var = input("Invalid input! Please select a valid option! \n
-                             Data are treated as linked and allocated, are you \n
+                var = input("Invalid input! Please select a valid option!\n\
+                             Data are treated as linked and allocated, are you\n\
                              sure you want to remove the markets? [y/n]: ")
             if var == 'n': 
                 self.log.info('Not removing markets, choice made through user input.')
@@ -1608,12 +1612,9 @@ class Ecospold2Matrix(object):
             self.log.warning("Remove markets: Data are linked and allocated, 
                               removing markets nonetheless. Choice made through user input")
         
-        
-
         #This function does not do anything at the moment as we decided to use ocelot
         #the linking/allocation. 
-
-
+        '''
         pass
 
     def build_sut(self, make_untraceable=False):

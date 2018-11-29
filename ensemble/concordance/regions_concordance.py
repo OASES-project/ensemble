@@ -1,4 +1,3 @@
-# -*- coding: utf-8 -*-
 """
 Created on Mon Okt 29 2018
 @author: arthur jakobs
