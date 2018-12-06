@@ -12,7 +12,7 @@ import pandas as pd
 import os
 import datetime
 import argparse
-import pdb
+#import pdb
 import sys
 sys.path.append("../ecoparser/")
 import make_regiondict
@@ -47,6 +47,10 @@ class RegionConcordance(object):
 
 
     def GetConcordance(self):
+        '''
+        Function builds or reads the concordance. Object needs to be initiated
+        before this function is called.
+        '''
         if  self.pickleFile is not None and os.path.isfile(self.pickleFile):
             print('Reading in concordance from: {}'.format(self.pickleFile))
             with open(self.pickleFile,'rb') as fh:
@@ -112,7 +116,7 @@ class RegionConcordance(object):
         exiobase mapping instead returns a None.
         '''
         value = self.countryConcord.set_index('Code').loc[ecoCode,'DESIRE code']
-        if not np.isnan(value):
+        if isinstance(value, str):
             print('Region in main concordance')
             desireCode = value
         elif ecoCode != 'RoW':
@@ -176,7 +180,7 @@ class RegionConcordance(object):
                     region_mapping[name] = None
                 except TypeError:
                     print('TypeError')
-                    pdb.set_trace()
+                    #pdb.set_trace()
         
         self.regionDict = region_mapping
         
@@ -334,5 +338,5 @@ if __name__ == "__main__":
     print("\n")
     CC = RegionConcordance(*vars(args).values())
     CC.GetConcordance()
-    row_CH = CC.GetDesireCode('RoW', 'CH')
-    print('RoW without Switzerland', row_CH, len(row_CH))
+    row_CH_FR = CC.GetDesireCode('RoW', ['CH', 'FR'])
+    print('RoW without Switzerland and France', row_CH_FR, len(row_CH_FR))
