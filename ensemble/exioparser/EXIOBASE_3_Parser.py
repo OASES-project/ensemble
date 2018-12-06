@@ -9,8 +9,23 @@ Edited on Thu Oct 17 2018
 This script takes the raw EXIObase 3 files and parses them into
 numpy matrices that are then stored in a .mat binary file.
 Also calulates Z and L matrices (optional)
-For usage see EXIOBASE_3_parser --h
+For usage see EXIOBASE_3_parser --help
+"""
 
+#%%
+import numpy as np
+import scipy.io
+import scipy
+import pandas as pd
+import os
+import datetime
+import argparse
+import pdb
+#%%
+
+include_Z = True
+def Main(args):
+    
     mainPath = args.exio_dir
     subpath = 'satellite'
 
@@ -32,7 +47,7 @@ For usage see EXIOBASE_3_parser --h
     MRIO_F_raw = Read_file(Path, index_columns = [0], column_names=[0,1])
     MRIO_F = MRIO_F_raw.values
     
-    #read in F_hh
+    #read in F_hh 
     Path = os.path.join(mainPath,subpath,'F_hh.txt')
     print("Reading in F_hh from:\n{}".format(Path))
     MRIO_Fhh_raw =  Read_file(Path, index_columns = [0], column_names=[0,1])
@@ -61,11 +76,11 @@ For usage see EXIOBASE_3_parser --h
     MRIO_Products = list(MRIO_Products['Name'])
 
     #get countries from Y
-    MRIO_Country = MRIO_Y_raw.index.get_level_values('region').unique() #Take all countries in the index
+    MRIO_Country = np.array(MRIO_Y_raw.index.get_level_values('region').unique().values, dtype='str') #Take all countries in the index
     
     Nsize = MRIO_A.shape[0]
     #Calculate Leontief Inverse
-    if args.Leontief:
+    if args.Leontief == True:
         print("Calculating Leontief inverse. This may take a while..")
         I = np.identity(Nsize)
         MRIO_L = np.linalg.inv(I-MRIO_A)
@@ -81,12 +96,12 @@ For usage see EXIOBASE_3_parser --h
     
     #Calculate Stressor per Industry expenditure
     print("Calculating Stressor per industry S")
-    MRIO_S  = np.divide(MRIO_F, MRIO_X, where = MRIO_X>0)#divides each row of F by X but only where X != 0
+    MRIO_S  = np.divide(MRIO_F, MRIO_X, where = MRIO_X>0)#divides each row of F by X but only where X != 0 
     #(the i'th column of F i divided by the i'th element of X if the latter is not 0
     print("Done calculating S")
 
     #Calculate Z
-    if args.include_Z:
+    if args.include_Z == True:
         print("Calculating Z")
         MRIO_Z = MRIO_A.dot(np.diag(MRIO_X))
     
@@ -94,7 +109,7 @@ For usage see EXIOBASE_3_parser --h
     print("Saving matrices to file...")
     mdict = {'EB3_FinalDemand_Emissions':MRIO_Fhh,
              'EB3_A_ITC':MRIO_A,
-             'EB3_S_ITC':MRIO_S,
+             'EB3_S_ITC':MRIO_S, 
              'EB3_Y':MRIO_Y,
              'EB3_TableUnits':'MEUR',
              'EB3_Extensions':MRIO_Funit,
@@ -105,18 +120,18 @@ For usage see EXIOBASE_3_parser --h
              'EB3_ProductNames163':MRIO_Products,
              'EB3_RegionList':MRIO_Country}
 
-    if args.include_Z and args.Leontief:
+    if args.include_Z == True and args.Leontief == True:
         filestring = 'EXIOBASE_IO_incl_Z_L_Mon_49R'
         mdict['EB3_L_ITC'] = MRIO_L
         mdict['EB3_Z_ITC'] = MRIO_Z
-    elif args.include_Z:
+    elif args.include_Z == True:
         filestring = 'EXIOBASE_IO_incl_Z_Mon_49R'
         mdict['EB3_Z_ITC'] = MRIO_Z
-    elif args.Leontief:
-        filestring = 'EXIOBASE_IO_incl_L_Mon_49R'
+    elif args.Leontief == True:
+        filestring = 'EXIOBASE_IO_incl_L_Mon_49R' 
         mdict['EB3_L_ITC'] = MRIO_L
     else:
-        filestring = 'EXIOBASE_IO_Mon_49R'
+        filestring = 'EXIOBASE_IO_Mon_49R'    
    
     outPath = Check_Output_dir(args)
     Filestring_Matlab_out = os.path.join(outPath,filestring+'_{}_{}.mat'.format(args.exio_dir.rstrip("/")[-3:],datetime.datetime.date(datetime.datetime.now())))
@@ -137,7 +152,7 @@ def Check_Output_dir(args):
         print("Created directory {}".format(outPath))
     return outPath
 
-def Read_file(path, index_columns=None, column_names=None):
+def Read_file(path, index_columns=[0,1], column_names=[0,1]):
     """
     returns data in csv file as pandas data frame
 
@@ -145,21 +160,17 @@ def Read_file(path, index_columns=None, column_names=None):
     index_columns   list of locumns to use as index. Default [0,1]
     column_names    list of rows to use as column names. Default [0,1]
     """
-    #data = pd.DataFrame.from_csv(path, sep = '\t', header=0, encoding = 'iso-8859-1' ) # standard UTF-8 encoding raises error
+    #data = pd.DataFrame.from_csv(path, sep = '\t', header=0, encoding = 'iso-8859-1' ) # standard UTF-8 encoding raises error 
     #pd.DataFrame.from_csv has been depreciated in favor of pd.read_csv, main differences:
     #- `index_col` is ``0`` instead of ``None`` (take first column as index by default)
     #- `parse_dates` is ``True`` instead of ``False`` (try parsing the index as datetime by default)
-    if index_columns == None:
-        index_columns = [0,1]
-    if column_names == None:
-        column_names = [0,1]
     data = pd.read_csv(path, sep = '\t', header=column_names, index_col=index_columns, encoding = 'iso-8859-1' ) # standard UTF-8 encoding raises error
     return data
 
 
 def ParseArgs():
     '''
-    ParsArgs parser the command line options
+    ParsArgs parser the command line options 
     and returns them as a Namespace object
     '''
     print("Parsing arguments...")
@@ -171,13 +182,13 @@ def ParseArgs():
     parser.add_argument("-l","--L", dest='Leontief', action='store_true',
                         help="If included calculates Leontief inverse and saves it too")
     
-    parser.add_argument("-e","--exiodir", type=str, dest='exio_dir',
+    parser.add_argument("-e","--exiodir", type=str, dest='exio_dir', 
                         default="/home/jakobs/data/EXIOBASE/exiobase3.4_iot_2011_pxp/IOT_2011_pxp",
                         help="Directory containing the EXIOBASE input files,\n\
                         should contain: A.txt, Y.txt, industries.txt and a \n\
                         folder satellite containing F_hh.txt, F.txt and unit.txt")
     
-    parser.add_argument("-o","--outdir", type=str, dest='outdir',
+    parser.add_argument("-o","--outdir", type=str, dest='outdir', 
                         default=None,
                         help="Optional dir for output. Otherwise saved in subfolder in  input dir")
     
@@ -191,10 +202,11 @@ def ParseArgs():
 
 
 if __name__ == "__main__":
-    args = ParseArgs()
+    args = ParseArgs()    
     print("Parsing with the following arguments")
     for key, path in vars(args).items():
         print(key,': ', path)
     print("\n")
     Main(args)
 #%%
+    
