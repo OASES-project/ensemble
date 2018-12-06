@@ -76,6 +76,9 @@ class ProductConcordance(object):
         '''
         Input: ecoinvent activityId, productId
         Output: exiobase productId
+        If product does not have a concording product in Exiobase,
+        (this can be for various reasons) this function will return
+        a None.
         '''
         act_prod = '_'.join((activityId, productId))
         print(act_prod)
