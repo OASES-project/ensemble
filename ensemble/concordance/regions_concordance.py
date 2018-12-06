@@ -47,6 +47,10 @@ class RegionConcordance(object):
 
 
     def GetConcordance(self):
+        '''
+        Function builds or reads the concordance. Object needs to be initiated
+        before this function is called.
+        '''
         if  self.pickleFile is not None and os.path.isfile(self.pickleFile):
             print('Reading in concordance from: {}'.format(self.pickleFile))
             with open(self.pickleFile,'rb') as fh:
