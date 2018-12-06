@@ -40,6 +40,10 @@ class ProductConcordance(object):
 
 
     def GetConcordance(self):
+        '''
+        Builds or reads in the Concordance. Object needs to be initiated 
+        before this can be called.
+        '''
         if  self.pickleFile is not None and os.path.isfile(self.pickleFile):
             print('Reading in concordance from: {}'.format(self.pickleFile))
             with open(self.pickleFile,'rb') as fh:
