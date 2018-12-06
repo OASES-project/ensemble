@@ -106,7 +106,7 @@ def Main(args):
         print("Calculating Z")
         MRIO_Z = MRIO_A.dot(np.diag(MRIO_X))
     
-    pdb.set_trace()
+    #pdb.set_trace()
     ### Write to mat file:
     print("Saving matrices to file...")
     mdict = {'EB3_FinalDemand_Emissions':MRIO_Fhh,
