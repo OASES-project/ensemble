@@ -135,7 +135,7 @@ class RegionConcordance(object):
             else:
                 print('No region given to exlude from Globally\n\
                 Returning GLOBAL')
-                desireCode = self.returnDict['GLO']
+                desireCode = self.regionDict['GLO']
         return desireCode
 
 
