@@ -127,6 +127,13 @@ class RegionConcordance(object):
                 row = self.RoW(excluded)
                 desireCode = self.countryConcord.set_index('Code').loc[
                                     row,'DESIRE code'].unique().tolist()
+                #Check for provinces in exlcuded. If provinces exist in ecluded
+                #the entire country needs to be excluded to avoid double
+                #counting. (I.e. the country is already included when the
+                #province is called.)
+                excl_list = self.countryConcord.set_index('Code').loc[excluded,
+                                    'DESIRE code'].tolist()
+                desireCode = [x for x in desireCode if not x in excl_list]
                 #get rid of potential nans from islands as Guernsey or Jersey
                 #that originate from the row process but are not (ei3.5 in the
                 #process data.
