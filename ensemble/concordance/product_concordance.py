@@ -81,7 +81,7 @@ class ProductConcordance(object):
         a None.
         '''
         act_prod = '_'.join((activityId, productId))
-        print(act_prod)
+        #print(act_prod)
         if act_prod  in self.ActivityProductConcordance.index.values:
             exioProductCode = self.ActivityProductConcordance.loc[act_prod,
                                                             'Concordance_1']
