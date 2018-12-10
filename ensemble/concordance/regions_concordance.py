@@ -117,10 +117,10 @@ class RegionConcordance(object):
         '''
         value = self.countryConcord.set_index('Code').loc[ecoCode,'DESIRE code']
         if isinstance(value, str):
-            print('Region in main concordance')
+            #print('Region in main concordance')
             desireCode = value
         elif ecoCode != 'RoW':
-            print('Looking up region via region regiondict')
+            #print('Looking up region via region regiondict')
             desireCode = self.regionDict[ecoCode]
         elif ecoCode == 'RoW':
             if excluded:
