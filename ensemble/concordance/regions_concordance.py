@@ -123,7 +123,7 @@ class RegionConcordance(object):
             #print('Looking up region via region regiondict')
             desireCode = self.regionDict[ecoCode]
             #RER throws in an error for Serbia & Montenegro, even though they 
-            are already included via WE (rest of europe).
+            #are already included via WE (rest of europe).
             if ecoCode == 'RER' and np.nan in desireCode:
                 desireCode.remove(np.nan)
         elif ecoCode == 'RoW':
