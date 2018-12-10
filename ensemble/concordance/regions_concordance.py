@@ -12,7 +12,7 @@ import pandas as pd
 import os
 import datetime
 import argparse
-#import pdb
+import pdb
 import sys
 sys.path.append("../ecoparser/")
 import make_regiondict
@@ -124,8 +124,8 @@ class RegionConcordance(object):
             desireCode = self.regionDict[ecoCode]
             #RER throws in an error for Serbia & Montenegro, even though they 
             #are already included via WE (rest of europe).
-            if ecoCode == 'RER' and np.nan in desireCode:
-                desireCode.remove(np.nan)
+            if ecoCode == 'RER':
+                desireCode = [x for x in desireCode if not isinstance(x,float)]
         elif ecoCode == 'RoW':
             if excluded:
                 row = self.RoW(excluded)
@@ -349,5 +349,5 @@ if __name__ == "__main__":
     print("\n")
     CC = RegionConcordance(*vars(args).values())
     CC.GetConcordance()
-    row_CH_FR = CC.GetDesireCode('RoW', ['CH', 'FR'])
-    print('RoW without Switzerland and France', row_CH_FR, len(row_CH_FR))
+    RER = CC.GetDesireCode('RER')
+    print('RER: ', RER, len(RER))
