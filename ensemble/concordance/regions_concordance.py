@@ -56,7 +56,8 @@ class RegionConcordance(object):
             with open(self.pickleFile,'rb') as fh:
                 [self.countryConcord,
                  self.notMatched,
-                 self.regionDict] = pickle.load(fh)
+                 self.regionDict,
+                 self.regionExceptions] = pickle.load(fh)
         elif self.pickleFile is not None:
             print('Pickle file given does not exist.')
             self.BuildConcordance()
@@ -124,7 +125,7 @@ class RegionConcordance(object):
             desireCode = self.regionDict[ecoCode]
             #RER throws in an error for Serbia & Montenegro, even though they 
             #are already included via WE (rest of europe).
-            if ecoCode == 'RER':
+            if ecoCode == 'RER' or 'Europe' in ecoCode:
                 desireCode = [x for x in desireCode if not isinstance(x,float)]
         elif ecoCode == 'RoW':
             if excluded:
@@ -162,15 +163,15 @@ class RegionConcordance(object):
         present in constructive geometries, those will get a None as return.
         '''
         region_mapping = {}
-        exceptions = {'RFC':'US', 'SERC':'US', 'TRE':'US',
-                      'WECC, US only':'US', 'SPP':'US',
-                      'NPCC, US only':'US', 'ASCC':'US',
-                      'HICC':'US', 'MRO, US only':'US',
-                      'SGCC':'CN', 'FRCC':'US', 'CSG':'CN'}
+        self.regionExceptions = {'RFC':'US', 'SERC':'US', 'TRE':'US',
+                                 'WECC, US only':'US', 'SPP':'US',
+                                 'NPCC, US only':'US', 'ASCC':'US',
+                                 'HICC':'US', 'MRO, US only':'US',
+                                 'SGCC':'CN', 'FRCC':'US', 'CSG':'CN'}
         for name in geo_codes:
         #GLOBAL and RoW need to be handled differently
-            if name in exceptions.keys():
-                region_mapping[name] = exceptions[name]
+            if name in self.regionExceptions.keys():
+                region_mapping[name] = self.regionExceptions[name]
             
             elif name == 'GLO':
                 glo = self.countryConcord['DESIRE code'][
@@ -198,6 +199,12 @@ class RegionConcordance(object):
         return
 
     def RoW(self,excluded):
+        #Need to convert the exceptions regions (such as the electricity
+        #network 'WECC US only' to the matching country via the exceptions
+        #dictionary. Otherwise they will throw an error when being contained in
+        #a RoW region.
+        excluded = [self.regionExceptions[x] if x in 
+                    self.regionExceptions.keys() else x for x in excluded]
         countrylist = self.CountryList(excluded, row=True)
         return countrylist
     
@@ -293,7 +300,7 @@ class RegionConcordance(object):
                                'EcoExioRegionConcordance_{}.pickle'.format(
                                datetime.datetime.date(datetime.datetime.now())))
         
-        saveList = [self.countryConcord, self.notMatched, self.regionDict]
+        saveList = [self.countryConcord, self.notMatched, self.regionDict, self.regionExceptions]
         
         with open(outFile, 'wb') as fh:
             pickle.dump(saveList, fh)
