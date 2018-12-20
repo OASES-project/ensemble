@@ -85,6 +85,12 @@ class ProductConcordance(object):
         if act_prod  in self.ActivityProductConcordance.index.values:
             exioProductCode = self.ActivityProductConcordance.loc[act_prod,
                                                             'Concordance_1']
+            #There are few Exceptions (metals from mining activities in the
+            #current exceptions list that match multiple categories but could be
+            # matched based on their productId, so if this is the case do this
+            if exioProductCode.split(',') != [exioProductCode]:
+                exioProductCode = self.productConcordance.loc[productId,
+                                                            'Concordance_2']
         elif productId in self.productConcordance.index.values:
             exioProductCode = self.productConcordance.loc[productId,
                                                             'Concordance_2']
