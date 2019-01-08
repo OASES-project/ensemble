@@ -71,9 +71,9 @@ class RegionConcordance(object):
         This function builds the necessary DataFrames and Dictionaries:
 
         self.countryConcord :       Main concordance DataFrame
-        self.notMatched = c :       DataFrame containing the regions that
+        self.notMatched     :       DataFrame containing the regions that
                                     did not match on their iso code
-        self.regionDict = B :
+        self.regionDict     :
         '''
         print('Building concordance...')
         geoDict_ei = make_regiondict.GeoDict(self.ecoDir,returnDict=True)
@@ -123,16 +123,19 @@ class RegionConcordance(object):
         elif ecoCode != 'RoW':
             #print('Looking up region via region regiondict')
             desireCode = self.regionDict[ecoCode]
-            #RER throws in an error for Serbia & Montenegro, even though they 
-            #are already included via WE (rest of europe).
-            if ecoCode == 'RER' or 'Europe' in ecoCode:
+            #Need to get rid of Jersey and Guernsey (in Europe) as well as a
+            #number of Caribean islands that are included in RLA (latin America
+            #and the Caribean) and are already inlcuded via the rest of the
+            #world regions.
+            if 'RER' in ecoCode or 'Europe' in ecoCode or 'ENTSO-E' in ecoCode\
+              or 'RLA' in ecoCode:
                 desireCode = [x for x in desireCode if not isinstance(x,float)]
         elif ecoCode == 'RoW':
             if excluded:
                 row = self.RoW(excluded)
                 desireCode = self.countryConcord.set_index('Code').loc[
                                     row,'DESIRE code'].unique().tolist()
-                #Check for provinces in exlcuded. If provinces exist in ecluded
+                #Check for provinces in exlcuded. If provinces exist in excluded
                 #the entire country needs to be excluded to avoid double
                 #counting. (I.e. the country is already included when the
                 #province is called.)
@@ -145,8 +148,8 @@ class RegionConcordance(object):
                 if np.nan in desireCode:
                     desireCode.remove(np.nan)
             else:
-                print('No region given to exlude from Globally\n\
-                Returning GLOBAL')
+                #print('No region given to exlude from Globally\n\
+                #Returning GLOBAL')
                 desireCode = self.regionDict['GLO']
         return desireCode
 
@@ -232,7 +235,10 @@ class RegionConcordance(object):
             countries = []
             for geo in geolist:
                 #print(geo, ': ', geomatcher.contained(geo, include_self=False))
-                if isinstance(geo,tuple):
+                if isinstance(geo,tuple) or geo == 'CS':#this is a bug as CS is
+                #Serbia and Montenegro which for some reason s not a tuple but
+                #but is a ecoinvent region consisting of the two countries
+                #Serbia RS and Montenegro ME.
                     if geomatcher.contained(geo, include_self=False) != []:
                         for subgeo in geomatcher.contained(geo,
                                                            include_self=False):
