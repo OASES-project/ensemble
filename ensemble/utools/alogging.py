@@ -77,4 +77,3 @@ def Logger(log_dir, project_name, caller_path, copy_script=False,
         log.info('copied config file {} to the the logging dir {}'.format(
                                                    config_file,log_dir))
     return log
-
