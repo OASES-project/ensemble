@@ -5,26 +5,20 @@ Created on Mon Nov 28 2018
 
 #%%
 import numpy as np
-import pandas as pd
 import os
-import datetime
 import argparse
-import pdb
 import sys
 sys.path.append("../ecoparser/")
-import make_regiondict
 sys.path.append("../concordance")
 from regions_concordance import RegionConcordance
 from product_concordance import ProductConcordance
 from regions_concordance import assert_list
 sys.path.append("../utools")
 import alogging
-import constructive_geometries as cg
 import pickle
 import configparser
 import gzip
 import scipy.io as sio
-import pdb
 #%%
 
 
@@ -72,7 +66,14 @@ def FillCuMatrix(config, logger):
                             config.get('concordance_data','regionPickleFile'),
                             config.get('concordance_data','concordance_outdir'),
                             logger)
-
+    #create indices dictionary for products and regions
+    ExProductDict = {}
+    for i, prodCode in enumerate(EB_ProductCodes200):
+        ExProductDict[prodCode.rstrip()] = i
+    ExCountryDict = {}
+    for i, countryCode in enumerate(EB_RegionList):
+        ExCountryDict[countryCode] = i
+    ExCountryDict['GLO'] = list(np.arange(len(EB_RegionList)))
     Cu = np.empty((EB['EB3_A_ITC'].shape[0], eco_obj['A'].shape[0]))
     logger.info(LogMessage(_name,'Created empty Cu Matrix'))
     logger.info(LogMessage(_name,'Starting to fill the Cut off matrix...\n\
@@ -86,9 +87,9 @@ def FillCuMatrix(config, logger):
         if flag == 0 or flag == 1. or flag == 2:
             Cu[:,i] = np.zeros(Cu.shape[0])
         else:
-            producer_indices, product_index, regions_indices, nProducts =\
+            producer_indices, _, regions_indices, nProducts =\
                 Code2Indices(exioProd, exioRegs, EB['EB3_ProductCodes200'],
-                             EB['EB3_RegionList'])
+                             EB['EB3_RegionList'], ExProductDict, ExCountryDict)
             alphas = CalculateAlphas(regions_indices, producer_indices,
                                      nProducts, EB['EB3_Z_ITC'])
             Cu[:,i], flag = CalcCu(producer_indices, alphas, prices, ecoProc,
@@ -101,11 +102,12 @@ def FillCuMatrix(config, logger):
                                                      exioProd, PC, RC,
                                                      eco_obj['A'],
                                                      eco_obj['PRO'])
-                if type(exproducts2set0) is np.ndarray:
+                if isinstance(exproducts2set0,np.ndarray):
                     row_indices, _, _, _ = Code2Indices(list(exproducts2set0),
-                                                   'GLO', 
+                                                   'GLO',
                                                    EB['EB3_ProductCodes200'],
-                                                   EB['EB3_RegionList'])
+                                                   EB['EB3_RegionList'],
+                                                   ExProductDict, ExCountryDict)
                     Cu[row_indices,i] = 0
 
     logger.info(LogMessage(_name,'Done filling Cu matrix'))
@@ -193,19 +195,8 @@ def GetEcoRegion(process, product, eco_pro):
     else:
         return region, None
 
-def Code2Indices(product, regionlist, EB_ProductCodes200, EB_RegionList):
-    #If global dictionaries do not exist yet
-    if not 'ExProductDict' in globals():
-        global ExProductDict
-        ExProductDict = {}
-        for i, prodCode in enumerate(EB_ProductCodes200):
-            ExProductDict[prodCode.rstrip()] = i
-    if not 'ExCountryDict' in globals():
-        global ExCountryDict
-        ExCountryDict = {}
-        for i, countryCode in enumerate(EB_RegionList):
-            ExCountryDict[countryCode] = i
-        ExCountryDict['GLO'] = list(np.arange(len(EB_RegionList)))
+def Code2Indices(product, regionlist, EB_ProductCodes200, EB_RegionList,
+                 ExProductDict, ExCountryDict):
     if isinstance(product, list):
         prodInd = [ExProductDict[x] for x in product]
     else:
