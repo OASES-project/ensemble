@@ -1,0 +1,18 @@
+#This configuration file works as a nested dictionary to be read by the configparser
+{               #start the config dictionary
+'eco_data' : {  #all ecoinvent main data related info
+'eco_flows' : '/home/jakobs/data/ecoinvent/ecoinvent 3.5_cutoff_ecoSpold02/ecoinvent 3.5_cutoff_ecoSpold02/flows.pickle', #price information is in this flow data
+'eco_matrices' : '/home/jakobs/data/ecoinvent/ei35_cutoff/ei35_cutoffPandas_symmNorm.gz.pickle'                           #the main ecoinvent metrices such as A,Z and PRO
+},               
+'exio_data' : { #start exiobase main data section
+'exio_matrices' : '/home/jakobs/data/EXIOBASE/exiobase3.4_iot_2011_pxp/IOT_2011_pxp/mat_matrices/EXIOBASE_IO_incl_Z_Mon_49R_pxp_2018-12-07.mat' #main exiobase file
+},
+'concordance_data' : {  #start concordance directory and file information
+'productConcFile' : '/home/jakobs/data/EcoBase/Product_Concordances-ei35-Update-20-12-2018.xlsx',   #in case the product concordance object needs to be build, here is the main file
+'productPickleFile' : '/home/jakobs/data/EcoBase/EcoExioProductConcordance_2019-01-03.pickle',      #in case it already exists, here is the pickle file to the object
+'regionEcoDir' : '/home/jakobs/data/ecoinvent/ecoinvent 3.5_cutoff_ecoSpold02/ecoinvent 3.5_cutoff_ecoSpold02/MasterData',  #as above but for the ecoinvent regions
+'regionExioDir' : '/home/jakobs/data/EXIOBASE/',                                                                            #same but for the exibase
+'regionPickleFile' : '/home/jakobs/data/EcoBase/EcoExioRegionConcordance_2019-01-03.pickle',                                #in case the concordance has already been build
+'concordance_outdir' : '/home/jakobs/data/EcoBase/'                                                                         #If concordances are build on the fly save them here
+}
+}
