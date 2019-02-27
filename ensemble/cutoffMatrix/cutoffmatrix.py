@@ -213,9 +213,9 @@ def Code2Indices(product, regionlist, EB_ProductCodes200, EB_RegionList,
     return exIndices, prodInd, regionsInds, nProducts
 
 def CalculateAlphas(regions_indices, producer_indices, nProducts, Z):
-    '''For now this just uses share in total world output to define the split
-    over different regions. Because of markets it is not possible to trace down
-    (or up-) stream supply chains.'''
+    '''For now this just uses share in total output of the producing regions
+    to define the split over these different regions. Because of markets it is 
+    not possible to trace down (or up-) stream supply chains.'''
     prodvol = Z[producer_indices,:].sum(axis=1)
     psum = prodvol.sum()
     if psum != 0:
@@ -241,6 +241,7 @@ def GetPrice(actId, prodId, prices):
 def CalcCu(producer_indices, alphas, prices, process, product, A_exio):
     '''Function '''
     price = GetPrice(process, product, prices)
+    price_scaled = price/1e6 #convert EURO to MEURO EXIOBASE base 
     if price:
         Cu_column = np.sum(A_exio[:,producer_indices]*alphas,\
                                                                 axis=1)*price
