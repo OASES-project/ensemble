@@ -26,7 +26,7 @@ class ProductConcordance(object):
     can read the concordance from a pickle file if run earlier.
     '''
     def __init__(self, concorFile, outDir, pickleFile=None,
-                 saveConcordance=True):
+                 saveConcordance=True, logger=None):
         self.concorFile = concorFile
         self.outDir = outDir
         self.saveConcordance = saveConcordance
@@ -34,7 +34,8 @@ class ProductConcordance(object):
         self.NotInConcordance = [] #a list of ecoinvent regions not present in
                                    #concordance. Currently also not being used
                                    #in ecoinvent 3.5
-
+        self.logger = logger       #optional self.logger to be passed from outside
+        
     def __repr__(self):
         return "Instance of class '{}'".format(self.__class__.__name__)
 
@@ -45,14 +46,27 @@ class ProductConcordance(object):
         before this can be called.
         '''
         if  self.pickleFile is not None and os.path.isfile(self.pickleFile):
-            print('Reading in concordance from: {}'.format(self.pickleFile))
+            if self.logger:
+                self.logger.info('{} - Reading in concordance from: {}'.format(
+                            __name__, self.pickleFile))
+            else:                
+                print('Reading in concordance from: {}'.format(self.pickleFile))
             with open(self.pickleFile,'rb') as fh:
                 [self.productConcordance,
                  self.ActivityProductConcordance] = pickle.load(fh)
         elif self.pickleFile is not None:
-            print('Pickle file given does not exist.')
+            if self.logger:
+                self.logger.info('{} - Pickle file given does not exist.\
+                            Reading in concordance from: {}'.format(
+                            __name__, self.concorFile))
+            else:                
+                print('Pickle file given does not exist.')
+
             self.ReadConcordanceFromExcel()
         else:
+            if self.logger:
+                self.logger.info('{} - Reading in concordance from: {}'.format(
+                            __name__, self.concorFile))
             self.ReadConcordanceFromExcel()
         return
 

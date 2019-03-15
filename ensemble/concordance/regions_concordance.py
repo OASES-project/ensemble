@@ -32,7 +32,7 @@ class RegionConcordance(object):
     Needs
     '''
     def __init__(self, ecoDir, exioDir, outDir, pickleFile=None,
-                 saveConcordance=True):
+                 saveConcordance=True, logger=False):
         self.ecoDir = ecoDir
         self.exioDir = exioDir
         self.outDir = outDir
@@ -41,6 +41,7 @@ class RegionConcordance(object):
         self.NotInConcordance = [] #a list of ecoinvent regions not present in
                                    #concordance. Currently also not being used
                                    #in ecoinvent 3.5
+        self.logger = logger
 
     def __repr__(self):
         return "Instance of class '{}'".format(self.__class__.__name__)
@@ -52,16 +53,26 @@ class RegionConcordance(object):
         before this function is called.
         '''
         if  self.pickleFile is not None and os.path.isfile(self.pickleFile):
-            print('Reading in concordance from: {}'.format(self.pickleFile))
+            if self.logger:
+                self.logger.info('{} - Reading in concordance from: {}'.format(
+                            __name__, self.pickleFile))
+            else:                
+                print('Reading in concordance from: {}'.format(self.pickleFile))
             with open(self.pickleFile,'rb') as fh:
                 [self.countryConcord,
                  self.notMatched,
                  self.regionDict,
                  self.regionExceptions] = pickle.load(fh)
         elif self.pickleFile is not None:
-            print('Pickle file given does not exist.')
+            if self.logger:
+                self.logger.info('{} - Pickle file given does not exist.\
+                            Reading in building concordance'.format(__name__))
+            else:                
+                print('Pickle file given does not exist.')
             self.BuildConcordance()
         else:
+            if self.logger:
+                self.logger.info('{} - Building concordance'.format(__name__))
             self.BuildConcordance()
         return
 
