@@ -38,7 +38,7 @@ def Logger(log_dir, project_name, caller_path, copy_script=False,
 
 
     #make frsh logging dir
-    log_dir = os.path.join(log_dir, 'log')    
+    log_dir = os.path.join(log_dir, 'log')
     os.system('rm -Rf {}'.format(log_dir))
     os.makedirs(log_dir)
 
