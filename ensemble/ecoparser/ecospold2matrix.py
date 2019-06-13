@@ -691,7 +691,8 @@ class Ecospold2Matrix(object):
             return {'productName': o.name.text,
                     'unitName': o.unitName.text,
                     'productId': o.get('id'),
-                    'unitId': o.get('unitId')}
+                    'unitId': o.get('unitId'), 
+                    'CPC code': [o.classification[i].classificationValue for i in range(len(o.classification)) if o.classification[i].classificationSystem == 'CPC']][0]}
 
         # Parse XML file
         with open(fp, 'r', encoding="utf-8") as fh:
