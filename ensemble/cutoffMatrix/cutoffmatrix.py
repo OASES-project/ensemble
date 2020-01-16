@@ -109,12 +109,11 @@ def FillCuMatrix(config, logger):
                                                    EB['EB3_RegionList'],
                                                    ExProductDict, ExCountryDict)
                     Cu[row_indices,i] = 0
-    '''
+
     logger.info(LogMessage(_name,'Done filling Cu matrix'))
 
     Write2File(Cu, 'Cu_matrix', config.get('project_info', 'project_outdir'),
                                                                         logger)
-    '''
     logger.info(LogMessage(_name,'Done'))
 
 
