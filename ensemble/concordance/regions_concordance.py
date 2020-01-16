@@ -156,8 +156,7 @@ class RegionConcordance(object):
                 #get rid of potential nans from islands as Guernsey or Jersey
                 #that originate from the row process but are not (ei3.5 in the
                 #process data.
-                if np.nan in desireCode:
-                    desireCode.remove(np.nan)
+                desireCode = [x for x in desireCode if x==x] #since nan's are not unique they fail this test
             else:
                 #print('No region given to exlude from Globally\n\
                 #Returning GLOBAL')

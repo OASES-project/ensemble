@@ -688,10 +688,18 @@ class Ecospold2Matrix(object):
 
             # Get list of id, name, unitId, and unitName for all intermediate
             # exchanges
+            # Added: CPC code (AJ)
+            try:
+                cpc = [o.classification[i].classificationValue for i in
+                       range(len(o.classification)) if
+                       o.classification[i].classificationSystem == 'CPC'][0]
+            except IndexError:
+                cpc = ''
             return {'productName': o.name.text,
                     'unitName': o.unitName.text,
                     'productId': o.get('id'),
-                    'unitId': o.get('unitId')}
+                    'unitId': o.get('unitId'),
+                    'CPCCode': str(cpc)}
 
         # Parse XML file
         with open(fp, 'r', encoding="utf-8") as fh:
@@ -1037,9 +1045,9 @@ class Ecospold2Matrix(object):
 
             # Record product Id
             if self.unlinked == True:
-                #objectify is a very handy way to parse an xml tree 
+                #objectify is a very handy way to parse an xml tree
                 #into a python object which is more easily accsesible
-                rroot = objectify.parse(sfile).getroot()                                                                                           
+                rroot = objectify.parse(sfile).getroot()
                 if hasattr(rroot, "activityDataset"):
                     stem = rroot.activityDataset
                 else:
@@ -1052,7 +1060,7 @@ class Ecospold2Matrix(object):
                         if flow.outputGroup == 0:
                             PRO.loc[file_index, 'productId'] = flow.attrib[
                                                    'intermediateExchangeId']
-                            #For the unlnked data the file name does not 
+                            #For the unlnked data the file name does not
                             #feature the _productID anymore, so loop through the
                             #flow data to find the reference flow.
                             break #An activity has only one reference flow by
