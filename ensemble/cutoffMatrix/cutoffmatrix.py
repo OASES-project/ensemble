@@ -68,12 +68,12 @@ def FillCuMatrix(config, logger):
                             logger)
     #create indices dictionary for products and regions
     ExProductDict = {}
-    for i, prodCode in enumerate(EB_ProductCodes200):
+    for i, prodCode in enumerate(EB['EB3_ProductCodes200']):
         ExProductDict[prodCode.rstrip()] = i
     ExCountryDict = {}
-    for i, countryCode in enumerate(EB_RegionList):
+    for i, countryCode in enumerate(EB['EB3_RegionList']):
         ExCountryDict[countryCode] = i
-    ExCountryDict['GLO'] = list(np.arange(len(EB_RegionList)))
+    ExCountryDict['GLO'] = list(np.arange(len(EB['EB3_RegionList'])))
     Cu = np.empty((EB['EB3_A_ITC'].shape[0], eco_obj['A'].shape[0]))
     logger.info(LogMessage(_name,'Created empty Cu Matrix'))
     logger.info(LogMessage(_name,'Starting to fill the Cut off matrix...\n\
@@ -109,11 +109,12 @@ def FillCuMatrix(config, logger):
                                                    EB['EB3_RegionList'],
                                                    ExProductDict, ExCountryDict)
                     Cu[row_indices,i] = 0
-
+    '''
     logger.info(LogMessage(_name,'Done filling Cu matrix'))
 
     Write2File(Cu, 'Cu_matrix', config.get('project_info', 'project_outdir'),
                                                                         logger)
+    '''
     logger.info(LogMessage(_name,'Done'))
 
 
