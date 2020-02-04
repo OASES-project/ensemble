@@ -52,9 +52,7 @@ def Main(args):
     print("Reading in F_hh from:\n{}".format(Path))
     MRIO_Fhh_raw =  Read_file(Path, index_columns = [0], column_names=[0,1])
     MRIO_Fhh = MRIO_Fhh_raw.values
-    MRIO_FCat = MRIO_Fhh_raw.index.values
     MRIO_FCat= MRIO_Fhh_raw.columns.get_level_values(1)[:7]
-
     #read in unit
     Path = os.path.join(mainPath,subpath,'unit.txt')
     print("Reading in units from:\n{}".format(Path))
