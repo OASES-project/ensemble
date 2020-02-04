@@ -38,22 +38,22 @@ def Main(args):
     #read in A
     Path = os.path.join(mainPath,'A.txt')
     print("Reading in A from:\n{}".format(Path))
-    MRIO_A_raw = Read_file(Path, index_columns = [0,1], column_names=[0,1])
-    MRIO_A = MRIO_A_raw.values
+    #MRIO_A_raw = Read_file(Path, index_columns = [0,1], column_names=[0,1])
+    #MRIO_A = MRIO_A_raw.values
     
-    #read in F
+    #read in Emissions/Resource Dataset of Each Industry (F Matrix)
     Path = os.path.join(mainPath,subpath,'F.txt')
     print("Reading in F from:\n{}".format(Path))
     MRIO_F_raw = Read_file(Path, index_columns = [0], column_names=[0,1])
     MRIO_F = MRIO_F_raw.values
     
-    #read in F_hh 
+    #read direct Emissions Dataset Emitted by Each Final Demand (Fhh Matrix) F_hh
     Path = os.path.join(mainPath,subpath,'F_hh.txt')
     print("Reading in F_hh from:\n{}".format(Path))
     MRIO_Fhh_raw =  Read_file(Path, index_columns = [0], column_names=[0,1])
     MRIO_Fhh = MRIO_Fhh_raw.values
-    MRIO_FCat= MRIO_Fhh_raw.index.values
-    MRIO_FCat= MRIO_FCat[0:7]
+    MRIO_FCat = MRIO_Fhh_raw.index.values
+    MRIO_FCat= MRIO_Fhh_raw.columns.get_level_values(1)[:7]
 
     #read in unit
     Path = os.path.join(mainPath,subpath,'unit.txt')
