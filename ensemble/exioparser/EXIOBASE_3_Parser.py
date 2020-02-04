@@ -38,8 +38,8 @@ def Main(args):
     #read in A
     Path = os.path.join(mainPath,'A.txt')
     print("Reading in A from:\n{}".format(Path))
-    #MRIO_A_raw = Read_file(Path, index_columns = [0,1], column_names=[0,1])
-    #MRIO_A = MRIO_A_raw.values
+    MRIO_A_raw = Read_file(Path, index_columns = [0,1], column_names=[0,1])
+    MRIO_A = MRIO_A_raw.values
     
     #read in Emissions/Resource Dataset of Each Industry (F Matrix)
     Path = os.path.join(mainPath,subpath,'F.txt')
