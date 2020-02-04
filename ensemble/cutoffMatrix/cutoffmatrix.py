@@ -237,6 +237,9 @@ def GetPrice(actId, prodId, prices):
         price = None
     return price
 
+def GetPrice2(cpccode, exioprod, exio_countries):
+
+    return 0
 
 def CalcCu(producer_indices, alphas, prices, process, product, A_exio):
     '''Function '''
