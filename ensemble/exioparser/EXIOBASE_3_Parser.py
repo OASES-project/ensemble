@@ -113,7 +113,7 @@ def Main(args):
              'EB3_S_ITC':MRIO_S, 
              'EB3_Y':MRIO_Y,
              'EB3_TableUnits':'MEUR',
-             'EB3_Extensions':MRIO_Funit,
+             'EB3_Extensions':MRIO_F,
              'EB3_Extensions_Labels':MRIO_Ftype,
              'EB3_Extensions_Units':MRIO_Funit,
              'EB3_FDCats':MRIO_FCat,
