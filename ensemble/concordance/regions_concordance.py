@@ -55,6 +55,7 @@ class RegionConcordance(object):
                                     # concordance. Currently also not being used
                                     # in ecoinvent 3.5
         self.logger = logger
+        self.geomatcher = None
 
     def __repr__(self):
         return "Instance of class '{}'".format(self.__class__.__name__)
@@ -241,7 +242,7 @@ class RegionConcordance(object):
         at: https://github.com/cmutel/constructive_geometries
         '''
 
-        if not geomatcher:
+        if self.geomatcher == None:
             self.geomatcher = cg.Geomatcher()
         if row:
             excluded = assert_list(GEO)
