@@ -6,31 +6,44 @@ This script creates a concordance file for the geographical regions in
 in ecoinvent and exiobase.
 """
 
-#%%
 import numpy as np
 import pandas as pd
 import os
 import datetime
 import argparse
-import pdb
+#import pdb
 import sys
 sys.path.append("../ecoparser/")
 import make_regiondict
 import constructive_geometries as cg
 import pickle
-#%%
-
 
 
 class RegionConcordance(object):
-    '''
+    """
     Object Class that builds the relevant concordance dataframes and
     dictionaries. Main function after initinalisation via BuildConcordance is
     GetDesireCode(ecoCode), which returns the DESIRE/EXIOBASE region code given
     the ecoinvent region code (ecoCode).
 
-    Needs
-    '''
+    ### Mandatory arguments:
+
+    ecoDir
+
+    exioDir
+
+    outDir
+
+    ### Optional arguments:
+
+    pickleFile
+
+    saveConcordance
+
+    logger
+
+    """
+
     def __init__(self, ecoDir, exioDir, outDir, pickleFile=None,
                  saveConcordance=True, logger=False):
         self.ecoDir = ecoDir
@@ -38,27 +51,25 @@ class RegionConcordance(object):
         self.outDir = outDir
         self.saveConcordance = saveConcordance
         self.pickleFile = pickleFile
-        self.NotInConcordance = [] #a list of ecoinvent regions not present in
-                                   #concordance. Currently also not being used
-                                   #in ecoinvent 3.5
+        self.NotInConcordance = []  # a list of ecoinvent regions not present in
+                                    # concordance. Currently also not being used
+                                    # in ecoinvent 3.5
         self.logger = logger
 
     def __repr__(self):
         return "Instance of class '{}'".format(self.__class__.__name__)
-
 
     def GetConcordance(self):
         '''
         Function builds or reads the concordance. Object needs to be initiated
         before this function is called.
         '''
-        if  self.pickleFile is not None and os.path.isfile(self.pickleFile):
+        if self.pickleFile is not None and os.path.isfile(self.pickleFile):
             if self.logger:
-                self.logger.info('{} - Reading in concordance from: {}'.format(
-                            __name__, self.pickleFile))
-            else:                
+                self.logger.info('{} - Reading in concordance from: {}'.format(__name__, self.pickleFile))
+            else:
                 print('Reading in concordance from: {}'.format(self.pickleFile))
-            with open(self.pickleFile,'rb') as fh:
+            with open(self.pickleFile, 'rb') as fh:
                 [self.countryConcord,
                  self.notMatched,
                  self.regionDict,
@@ -67,7 +78,7 @@ class RegionConcordance(object):
             if self.logger:
                 self.logger.info('{} - Pickle file given does not exist.\
                             Reading in building concordance'.format(__name__))
-            else:                
+            else:
                 print('Pickle file given does not exist.')
             self.BuildConcordance()
         else:
@@ -75,7 +86,6 @@ class RegionConcordance(object):
                 self.logger.info('{} - Building concordance'.format(__name__))
             self.BuildConcordance()
         return
-
 
     def BuildConcordance(self):
         '''
@@ -87,36 +97,34 @@ class RegionConcordance(object):
         self.regionDict     :
         '''
         print('Building concordance...')
-        geoDict_ei = make_regiondict.GeoDict(self.ecoDir,returnDict=True)
-        geoDf_ei = pd.DataFrame(data = np.array([list(geoDict_ei.keys()),
-                              list(geoDict_ei.values())]).T,
-                              columns=['Code', 'Name'])
-        regionFile_ex = os.path.join(self.exioDir,
-                         'EXIOBASE_CountryMapping_Master_20170320.csv')
+        geoDict_ei = make_regiondict.GeoDict(self.ecoDir, returnDict=True)
+        geoDf_ei = pd.DataFrame(data=np.array([list(geoDict_ei.keys()),
+                                list(geoDict_ei.values())]).T,
+                                columns=['Code', 'Name'])
+        regionFile_ex = os.path.join(self.exioDir, 'EXIOBASE_CountryMapping_Master_20170320.csv')
         regionDf_ex = pd.read_csv(regionFile_ex, header=0, index_col=0)
-        #South Sudan, Kosovo and Namibia do not have an iso2 code, change this:
-        regionDf_ex.loc[regionDf_ex['ISO3'].isin(['KSV','NAM', 'SSD']),
+        # South Sudan, Kosovo and Namibia do not have an iso2 code, change this:
+        regionDf_ex.loc[regionDf_ex['ISO3'].isin(['KSV', 'NAM', 'SSD']),
                         'ISO2'] = ['XK', 'NA', 'SS']
 
-        #split country-province codes e.g.: CN-..
-        #to only contain country code e.g.: CN
+        # split country-province codes e.g.: CN-..
+        # to only contain country code e.g.: CN
         geoDf_ei = self.ParseCombiCodes(geoDf_ei)
-        
-        #merge eco and exio country list on iso codes
+
+        # merge eco and exio country list on iso codes
         self.countryConcord = geoDf_ei.merge(regionDf_ex, left_on='Code_2',
                                              right_on='ISO2', how='left',
                                              suffixes=('_eco', '_exio'))
-        
+
         not_matched_mask = self.countryConcord['DESIRE code'].isnull()
         self.notMatched = self.countryConcord.loc[not_matched_mask]
-        #these are mostly the aggregate regions and some exceptions (i.e. XK)
+        # these are mostly the aggregate regions and some exceptions (i.e. XK)
         self.BuildRegionDict(self.notMatched.Code.values)
-        
+
         if self.saveConcordance:
             self.SaveConcordance()
 
         return
-
 
     def GetDesireCode(self, ecoCode, excluded=None):
         '''
@@ -127,17 +135,17 @@ class RegionConcordance(object):
         WARNING: Does not throw error when ecoCode does not have a valid
         exiobase mapping instead returns a None.
         '''
-        value = self.countryConcord.set_index('Code').loc[ecoCode,'DESIRE code']
+        value = self.countryConcord.set_index('Code').loc[ecoCode, 'DESIRE code']
         if isinstance(value, str):
-            #print('Region in main concordance')
+            # print('Region in main concordance')
             desireCode = value
         elif ecoCode != 'RoW':
-            #print('Looking up region via region regiondict')
+            # print('Looking up region via region regiondict')
             desireCode = self.regionDict[ecoCode]
-            #Need to get rid of Jersey and Guernsey (in Europe) as well as a
-            #number of Caribean islands that are included in RLA (latin America
-            #and the Caribean) and are already inlcuded via the rest of the
-            #world regions.
+            # Need to get rid of Jersey and Guernsey (in Europe) as well as a
+            # number of Caribean islands that are included in RLA (latin America
+            # and the Caribean) and are already inlcuded via the rest of the
+            # world regions.
             if 'RER' in ecoCode or 'Europe' in ecoCode or 'ENTSO-E' in ecoCode\
               or 'RLA' in ecoCode:
                 desireCode = [x for x in desireCode if not isinstance(x,float)]
@@ -146,23 +154,22 @@ class RegionConcordance(object):
                 row = self.RoW(excluded)
                 desireCode = self.countryConcord.set_index('Code').loc[
                                     row,'DESIRE code'].unique().tolist()
-                #Check for provinces in exlcuded. If provinces exist in excluded
-                #the entire country needs to be excluded to avoid double
-                #counting. (I.e. the country is already included when the
-                #province is called.)
+                # Check for provinces in exlcuded. If provinces exist in excluded
+                # the entire country needs to be excluded to avoid double
+                # counting. (I.e. the country is already included when the
+                # province is called.)
                 excl_list = self.countryConcord.set_index('Code').loc[excluded,
                                     'DESIRE code'].tolist()
                 desireCode = [x for x in desireCode if not x in excl_list]
-                #get rid of potential nans from islands as Guernsey or Jersey
-                #that originate from the row process but are not (ei3.5 in the
-                #process data.
-                desireCode = [x for x in desireCode if x==x] #since nan's are not unique they fail this test
+                # get rid of potential nans from islands as Guernsey or Jersey
+                # that originate from the row process but are not (ei3.5 in the
+                # process data.
+                desireCode = [x for x in desireCode if x == x]  # since nan's are not unique they fail this test
             else:
-                #print('No region given to exlude from Globally\n\
-                #Returning GLOBAL')
+                # print('No region given to exlude from Globally\n\
+                # Returning GLOBAL')
                 desireCode = self.regionDict['GLO']
         return desireCode
-
 
     def BuildRegionDict(self, geo_codes):
         '''
@@ -176,13 +183,13 @@ class RegionConcordance(object):
         present in constructive geometries, those will get a None as return.
         '''
         region_mapping = {}
-        self.regionExceptions = {'RFC':'US', 'SERC':'US', 'TRE':'US',
-                                 'WECC, US only':'US', 'SPP':'US',
-                                 'NPCC, US only':'US', 'ASCC':'US',
-                                 'HICC':'US', 'MRO, US only':'US',
-                                 'SGCC':'CN', 'FRCC':'US', 'CSG':'CN'}
+        self.regionExceptions = {'RFC': 'US', 'SERC': 'US', 'TRE': 'US',
+                                 'WECC, US only': 'US', 'SPP': 'US',
+                                 'NPCC, US only': 'US', 'ASCC': 'US',
+                                 'HICC': 'US', 'MRO, US only': 'US',
+                                 'SGCC': 'CN', 'FRCC': 'US', 'CSG': 'CN'}
         for name in geo_codes:
-        #GLOBAL and RoW need to be handled differently
+        # GLOBAL and RoW need to be handled differently
             if name in self.regionExceptions.keys():
                 region_mapping[name] = self.regionExceptions[name]
             
@@ -212,10 +219,10 @@ class RegionConcordance(object):
         return
 
     def RoW(self,excluded):
-        #Need to convert the exceptions regions (such as the electricity
-        #network 'WECC US only' to the matching country via the exceptions
-        #dictionary. Otherwise they will throw an error when being contained in
-        #a RoW region.
+        # Need to convert the exceptions regions (such as the electricity
+        # network 'WECC US only' to the matching country via the exceptions
+        # dictionary. Otherwise they will throw an error when being contained in
+        # a RoW region.
         excluded = [self.regionExceptions[x] if x in 
                     self.regionExceptions.keys() else x for x in excluded]
         countrylist = self.CountryList(excluded, row=True)
@@ -234,30 +241,31 @@ class RegionConcordance(object):
         at: https://github.com/cmutel/constructive_geometries
         '''
 
-        geomatcher = cg.Geomatcher()
+        if not geomatcher:
+            self.geomatcher = cg.Geomatcher()
         if row:
             excluded = assert_list(GEO)
-            with cg.resolved_row(excluded, geomatcher) as g:
+            with cg.resolved_row(excluded, self.geomatcher) as g:
                 geolist = g.contained('RoW', include_self=False)
         else:
-            geolist = geomatcher.contained(GEO, include_self=False)
+            geolist = self.geomatcher.contained(GEO, include_self=False)
         if not geolist == []:
             countries = []
             for geo in geolist:
                 #print(geo, ': ', geomatcher.contained(geo, include_self=False))
                 if isinstance(geo,tuple) or geo == 'CS':#this is a bug as CS is
-                #Serbia and Montenegro which for some reason s not a tuple but
-                #but is a ecoinvent region consisting of the two countries
-                #Serbia RS and Montenegro ME.
+                # Serbia and Montenegro which for some reason s not a tuple but
+                # but is a ecoinvent region consisting of the two countries
+                # Serbia RS and Montenegro ME.
                     if geomatcher.contained(geo, include_self=False) != []:
                         for subgeo in geomatcher.contained(geo,
                                                            include_self=False):
                             if subgeo not in geolist:
                                 countries.append(subgeo)
                     else:
-                        #Some exceptions to be handled.
+                        # Some exceptions to be handled.
                         region = geo[1]
-                        splitreg = region.split('-') #provinces are all of the form (#)##-##
+                        splitreg = region.split('-')  # provinces are all of the form (#)##-##
                         if len(splitreg) == 2 and len(splitreg[0]) == 2:
                             countries.append(splitreg[0])
                         elif len(splitreg) == 2 and splitreg[0] == 'AUS':
@@ -270,15 +278,15 @@ class RegionConcordance(object):
                     #print('country')
                     countries.append(geo)
                 else:
-                    #If no tuple, (meaning no predefined region as all regions
-                    #in from the constructive geomtery package follow the
-                    #following form (topo, region). Then it must have been
-                    #handled in the exceptions.
+                    # If no tuple, (meaning no predefined region as all regions
+                    # in from the constructive geomtery package follow the
+                    # following form (topo, region). Then it must have been
+                    # handled in the exceptions.
                     pass
                     #print(geo, 'empty')
         else:
             return None
-        #only return a unique list
+        # only return a unique list
         return np.unique(countries).tolist()
     
     @staticmethod
@@ -286,13 +294,13 @@ class RegionConcordance(object):
         '''Splits the code names with a -
         into single 2 letter codes. I.e.
         get rid of province level detail'''
-        #first split codes at -
+        # first split codes at -
         df['Code_2'] = df['Code'].str.split('-')
-        #Then handle case individually
+        # Then handle case individually
         for i in range(len(df['Code_2'].values)):
             if len(df.Code_2.iloc[i]) > 1:
                 if df.Code_2.iloc[i][0] == 'UN':
-                    #if one of the #UN regions, only save the region part of it
+                    # if one of the #UN regions, only save the region part of it
                     df.Code_2.iloc[i] = df.Code_2.iloc[i][1]
                 elif df.Code_2.iloc[i][0] == 'AUS':
                     df.Code_2.iloc[i] = 'AU'
@@ -322,6 +330,7 @@ class RegionConcordance(object):
             pickle.dump(saveList, fh)
         print('Concordance saved to: {}'.format(outFile))
         return
+
 
 def assert_list(something):
     if not isinstance(something, list):
