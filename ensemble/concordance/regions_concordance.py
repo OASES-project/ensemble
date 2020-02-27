@@ -259,7 +259,7 @@ class RegionConcordance(object):
                 # but is a ecoinvent region consisting of the two countries
                 # Serbia RS and Montenegro ME.
                     if self.geomatcher.contained(geo, include_self=False) != []:
-                        for subgeo in geomatcher.contained(geo,
+                        for subgeo in self.geomatcher.contained(geo,
                                                            include_self=False):
                             if subgeo not in geolist:
                                 countries.append(subgeo)
