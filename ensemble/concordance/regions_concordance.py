@@ -253,12 +253,12 @@ class RegionConcordance(object):
         if not geolist == []:
             countries = []
             for geo in geolist:
-                #print(geo, ': ', geomatcher.contained(geo, include_self=False))
-                if isinstance(geo,tuple) or geo == 'CS':#this is a bug as CS is
+                # print(geo, ': ', geomatcher.contained(geo, include_self=False))
+                if isinstance(geo,tuple) or geo == 'CS':  # this is a bug as CS is
                 # Serbia and Montenegro which for some reason s not a tuple but
                 # but is a ecoinvent region consisting of the two countries
                 # Serbia RS and Montenegro ME.
-                    if geomatcher.contained(geo, include_self=False) != []:
+                    if self.geomatcher.contained(geo, include_self=False) != []:
                         for subgeo in geomatcher.contained(geo,
                                                            include_self=False):
                             if subgeo not in geolist:
