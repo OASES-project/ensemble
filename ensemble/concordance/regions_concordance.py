@@ -9,11 +9,13 @@ in ecoinvent and exiobase.
 import numpy as np
 import pandas as pd
 import os
+from os.path import dirname, realpath, join
 import datetime
 import argparse
 #import pdb
 import sys
-sys.path.append("../ecoparser/")
+parentDir = os.path.dirname(os.path.dirname(os.path.realpath(__file__)))
+sys.path.append(join(parentDir,'ecoparser/'))
 import make_regiondict
 import constructive_geometries as cg
 import pickle
@@ -286,6 +288,7 @@ class RegionConcordance(object):
                     pass
                     #print(geo, 'empty')
         else:
+            # For purpose of matching with BACI countries, we need to get back in which region it
             return None
         # only return a unique list
         return np.unique(countries).tolist()
