@@ -263,7 +263,7 @@ class RegionConcordance(object):
                     if self.geomatcher.contained(geo, include_self=False) != []:
                         for subgeo in self.geomatcher.contained(geo,
                                                            include_self=False):
-                            if subgeo not in geolist:
+                            if subgeo not in geolist and not isinstance(subgeo, tuple):
                                 countries.append(subgeo)
                     else:
                         # Some exceptions to be handled.
