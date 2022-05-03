@@ -190,7 +190,11 @@ class RegionConcordance(object):
                                  'WECC, US only': 'US', 'SPP': 'US',
                                  'NPCC, US only': 'US', 'ASCC': 'US',
                                  'HICC': 'US', 'MRO, US only': 'US',
-                                 'SGCC': 'CN', 'FRCC': 'US', 'CSG': 'CN'}
+                                 'SGCC': 'CN', 'FRCC': 'US', 'CSG': 'CN',
+                                 'US-HICC': 'US', 'US-SERC': 'US',
+                                 'US-WECC': 'US', 'US-MRO': 'US',
+                                 'US-ASCC': 'US', 'US-NPCC': 'US',
+                                 'US-TRE': 'US', 'US-RFC': 'US', 'US-PR':'US'}
         for name in geo_codes:
         # GLOBAL and RoW need to be handled differently
             if name in self.regionExceptions.keys():
